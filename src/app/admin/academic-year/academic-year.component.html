@@ -1,0 +1,164 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{action.MenuTitle}}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+          <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-sm-4 mb-3">
+      <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+        data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New Academic Year</button>
+    </div>
+  </div>
+
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body">
+        <div class="table-container overflow-auto">
+          <div class="dataTable-top">
+            <div class="dataTable-dropdown d-flex">
+              <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                <option *ngFor="let option of PageSize" [value]="option">{{option}}</option>
+              </select>
+              <span class="ms-2">Entries per page</span>
+            </div>
+            <div class="dataTable-search">
+              <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                placeholder="Search..." type="text">
+            </div>
+          </div>
+
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th style="cursor:pointer;" (click)="sort('AcademicYear')">Academic Year</th>
+                <th style="cursor:pointer;" (click)="sort('StartDate')">Start Date</th>
+                <th style="cursor:pointer;" (click)="sort('EndDate')">End Date</th>
+                <th style="cursor:pointer;" (click)="sort('IsCurrent')">Current</th>
+                <th style="cursor:pointer;" (click)="sort('Status')">Status</th>
+                <th *ngIf="action.CanEdit">Edit</th>
+                <th *ngIf="action.CanDelete">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let item of AcademicYearList | filter:Search | orderBy:sortKey:reverse | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index">
+                <td>{{ (p - 1) * itemPerPage + i + 1 }}</td>
+                <td>{{ item.AcademicYear }}</td>
+                <td>{{ item.StartDate | date:'dd-MMM-yyyy' }}</td>
+                <td>{{ item.EndDate | date:'dd-MMM-yyyy' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="item.IsCurrent ? 'bg-success' : 'bg-secondary'">
+                    {{ item.IsCurrent ? 'Yes' : 'No' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="item.Status ? 'bg-success' : 'bg-danger'">
+                    {{ item.Status ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td *ngIf="action.CanEdit">
+                  <button mat-icon-button color="primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                    (click)="editAcademicYear(item)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </td>
+                <td *ngIf="action.CanDelete">
+                  <button mat-icon-button color="warn" (click)="deleteAcademicYear(item)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="AcademicYearList?.length == 0">
+                <td colspan="8" class="text-center">No records found</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="dataTable-bottom">
+            <pagination-controls (pageChange)="onTableDataChange($event)"></pagination-controls>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">
+            {{ AcademicYear.AcademicYearId > 0 ? 'Update' : 'New' }} Academic Year
+          </h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+            (click)="resetForm()"></button>
+        </div>
+        <div class="modal-body">
+          <form #formAcademicYear="ngForm">
+            <div class="row">
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Academic Year</mat-label>
+                <input matInput name="AcademicYear" [(ngModel)]="AcademicYear.AcademicYear" required
+                  placeholder="e.g. 2026-2027" autofocus>
+                <mat-error>Academic Year is <strong>required</strong></mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Start Date</mat-label>
+                <input matInput [matDatepicker]="startPicker" name="StartDate"
+                  [(ngModel)]="AcademicYear.StartDate" required>
+                <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                <mat-datepicker #startPicker></mat-datepicker>
+                <mat-error>Start Date is <strong>required</strong></mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>End Date</mat-label>
+                <input matInput [matDatepicker]="endPicker" name="EndDate"
+                  [(ngModel)]="AcademicYear.EndDate" required>
+                <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+                <mat-datepicker #endPicker></mat-datepicker>
+                <mat-error>End Date is <strong>required</strong></mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Status</mat-label>
+                <mat-select name="Status" [(ngModel)]="AcademicYear.Status" required>
+                  <mat-option [value]="true">Active</mat-option>
+                  <mat-option [value]="false">Inactive</mat-option>
+                </mat-select>
+                <mat-error>Status is <strong>required</strong></mat-error>
+              </mat-form-field>
+
+              <div class="col-sm-6 mt-2">
+                <mat-checkbox name="IsCurrent" [(ngModel)]="AcademicYear.IsCurrent">
+                  Mark as Current Academic Year
+                </mat-checkbox>
+              </div>
+
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+            (click)="resetForm()">Cancel</button>
+          <button mat-raised-button color="primary" (click)="saveAcademicYear()">
+            {{ AcademicYear.AcademicYearId > 0 ? 'Update' : 'Submit' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
