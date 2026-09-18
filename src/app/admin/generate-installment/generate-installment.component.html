@@ -1,0 +1,144 @@
+<p>generate-installment works!</p>
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-12">
+      <h1>{{ action.MenuTitle || 'Generate Fee Installments' }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle || 'Fee' }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle || 'Generate Installments' }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Generate Panel -->
+  <div class="card mb-3">
+    <div class="card-header fw-semibold">Generate Installments</div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Academic Year</mat-label>
+            <mat-select [(ngModel)]="Form.AcademicYearId" required>
+              <mat-option *ngFor="let y of AcademicYearList" [value]="y.AcademicYearId">
+                {{ y.AcademicYear }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Class (optional)</mat-label>
+            <mat-select [(ngModel)]="Form.ClassId">
+              <mat-option [value]="null">All Classes</mat-option>
+              <mat-option *ngFor="let c of ClassList" [value]="c.ClassId">{{ c.ClassName }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-2">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Month</mat-label>
+            <mat-select [(ngModel)]="Form.MonthNo">
+              <mat-option *ngFor="let m of monthList" [value]="m.Key">{{ m.Value }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-2">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Year</mat-label>
+            <input matInput type="number" [(ngModel)]="Form.YearNo">
+          </mat-form-field>
+        </div>
+        <div class="col-md-2 d-flex align-items-center">
+          <button mat-raised-button color="primary" (click)="generate()">
+            Generate
+          </button>
+        </div>
+      </div>
+      <small class="text-muted">
+        Creates pending fee rows from Fee Structure for active students. Existing installments are skipped.
+      </small>
+    </div>
+  </div>
+
+  <!-- List -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span>Generated Installments</span>
+      <button mat-stroked-button color="primary" (click)="loadList()">Refresh List</button>
+    </div>
+    <div class="card-body">
+      <div class="row mb-2">
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Class</mat-label>
+            <mat-select [(ngModel)]="Filter.ClassId" (selectionChange)="loadList()">
+              <mat-option [value]="null">All</mat-option>
+              <mat-option *ngFor="let c of ClassList" [value]="c.ClassId">{{ c.ClassName }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-2">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Month</mat-label>
+            <mat-select [(ngModel)]="Filter.MonthNo" (selectionChange)="loadList()">
+              <mat-option [value]="null">All</mat-option>
+              <mat-option *ngFor="let m of monthList" [value]="m.Key">{{ m.Value }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-2">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Year</mat-label>
+            <input matInput type="number" [(ngModel)]="Filter.YearNo" (change)="loadList()">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Admission No</th>
+              <th>Student</th>
+              <th>Class</th>
+              <th>Fee Head</th>
+              <th>Period</th>
+              <th class="text-end">Amount</th>
+              <th class="text-end">Balance</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of InstallmentList | filter:Search | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index">
+              <td>{{ (p - 1) * itemPerPage + i + 1 }}</td>
+              <td>{{ item.AdmissionNo }}</td>
+              <td>{{ item.StudentName }}</td>
+              <td>{{ item.ClassName }}</td>
+              <td>{{ item.FeeHeadName }}</td>
+              <td>{{ getMonthName(item.MonthNo) }} {{ item.YearNo }}</td>
+              <td class="text-end">₹ {{ item.Amount | number:'1.2-2' }}</td>
+              <td class="text-end fw-semibold">₹ {{ item.BalanceAmount | number:'1.2-2' }}</td>
+              <td>
+                <span class="badge"
+                  [ngClass]="item.PaymentStatus === 'Paid' ? 'bg-success' : (item.PaymentStatus === 'Partial' ? 'bg-warning text-dark' : 'bg-danger')">
+                  {{ item.PaymentStatus }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="InstallmentList.length == 0">
+              <td colspan="9" class="text-center">No installments found. Generate first.</td>
+            </tr>
+          </tbody>
+        </table>
+        <pagination-controls (pageChange)="onTableDataChange($event)"></pagination-controls>
+      </div>
+    </div>
+  </div>
+
+</main>
