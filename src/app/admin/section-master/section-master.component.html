@@ -1,0 +1,160 @@
+<p-confirmDialog></p-confirmDialog>
+
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="pagetitle">
+    <h1>{{ action.MenuTitle }}</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+        <li class="breadcrumb-item">{{ action.ParentMenuTitle }}</li>
+        <li class="breadcrumb-item active">{{ action.MenuTitle }}</li>
+      </ol>
+    </nav>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <button pButton pRipple label="New Section" icon="pi pi-plus"
+          class="p-button-success p-button-sm" *ngIf="action.CanCreate"
+          (click)="openNew()">
+        </button>
+
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" #searchInput
+            (input)="dt.filterGlobal(searchInput.value, 'contains')"
+            placeholder="Search section..." class="p-inputtext-sm" />
+        </span>
+      </div>
+
+      <p-table #dt
+        [value]="SectionMasterList"
+        [rows]="10"
+        [paginator]="true"
+        [globalFilterFields]="['ClassName','SectionName']"
+        [rowHover]="true"
+        dataKey="SectionId"
+        [loading]="dataLoading"
+        styleClass="p-datatable-sm p-datatable-gridlines"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+        [rowsPerPageOptions]="[10, 25, 50]">
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width:60px">S.No</th>
+            <th pSortableColumn="ClassName">Class <p-sortIcon field="ClassName"></p-sortIcon></th>
+            <th pSortableColumn="SectionName">Section <p-sortIcon field="SectionName"></p-sortIcon></th>
+            <th pSortableColumn="Status" style="width:110px">Status <p-sortIcon field="Status"></p-sortIcon></th>
+            <th style="width:100px" *ngIf="action.CanEdit || action.CanDelete">Action</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-item let-i="rowIndex">
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.ClassName }}</td>
+            <td><strong>{{ item.SectionName }}</strong></td>
+            <td>
+              <p-tag [value]="item.Status ? 'Active' : 'Inactive'"
+                [severity]="item.Status ? 'success' : 'danger'">
+              </p-tag>
+            </td>
+            <td>
+              <div class="d-flex gap-1">
+                <button pButton pRipple icon="pi pi-pencil"
+                  class="p-button-rounded p-button-text p-button-success p-button-sm"
+                  *ngIf="action.CanEdit" (click)="editSectionMaster(item)">
+                </button>
+                <button pButton pRipple icon="pi pi-trash"
+                  class="p-button-rounded p-button-text p-button-danger p-button-sm"
+                  *ngIf="action.CanDelete" (click)="deleteSectionMaster(item)">
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="text-center p-3 text-muted">No sections found</td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+    </div>
+  </div>
+
+  <!-- Dialog -->
+  <p-dialog
+    [(visible)]="displayDialog"
+    [header]="SectionMaster.SectionId > 0 ? 'Update Section' : 'New Section'"
+    [modal]="true"
+    [style]="{ width: '400px' }"
+    [draggable]="false"
+    [resizable]="false"
+    (onHide)="hideDialog()">
+
+    <form #formSectionMaster="ngForm" class="p-fluid">
+
+      <div class="field mb-3">
+        <label class="mb-1">Class <span class="text-danger">*</span></label>
+        <p-dropdown name="ClassId"
+          [options]="ClassList"
+          [(ngModel)]="SectionMaster.ClassId"
+          optionLabel="ClassName"
+          optionValue="ClassId"
+          placeholder="Select Class"
+          [filter]="true"
+          filterPlaceholder="Search class"
+          [required]="true"
+          styleClass="p-inputtext-sm">
+        </p-dropdown>
+        <small class="p-error" *ngIf="isSubmitted && formSectionMaster.controls['ClassId']?.invalid">
+          Class is required
+        </small>
+      </div>
+
+      <div class="field mb-3">
+        <label class="mb-1">Section Name <span class="text-danger">*</span></label>
+        <input pInputText name="SectionName"
+          [(ngModel)]="SectionMaster.SectionName"
+          [required]="true"
+          autofocus
+          placeholder="e.g. A, B, C, D"
+          class="p-inputtext-sm" />
+        <small class="p-error" *ngIf="isSubmitted && formSectionMaster.controls['SectionName']?.invalid">
+          Section Name is required
+        </small>
+      </div>
+
+      <div class="field mb-3">
+        <label class="mb-1">Status <span class="text-danger">*</span></label>
+        <p-dropdown name="Status"
+          [options]="statusOptions"
+          [(ngModel)]="SectionMaster.Status"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select Status"
+          [required]="true"
+          styleClass="p-inputtext-sm">
+        </p-dropdown>
+      </div>
+
+    </form>
+
+    <ng-template pTemplate="footer">
+      <button pButton label="Cancel" icon="pi pi-times"
+        class="p-button-text p-button-sm" (click)="hideDialog()"></button>
+      <button pButton
+        [label]="SectionMaster.SectionId > 0 ? 'Update' : 'Save'"
+        icon="pi pi-check"
+        class="p-button-sm"
+        (click)="saveSectionMaster()"></button>
+    </ng-template>
+  </p-dialog>
+
+</main>
