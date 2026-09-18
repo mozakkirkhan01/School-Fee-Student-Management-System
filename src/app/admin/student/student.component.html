@@ -1,864 +1,270 @@
-<p-confirmDialog></p-confirmDialog>
-
+<app-progress *ngIf="dataLoading"></app-progress>
 <main id="main" class="main" *ngIf="action.ResponseReceived">
 
-    <!-- Page Header -->
-    <div class="page-header mb-4">
-        <div>
-            <h2 class="page-title">
-                {{ action.MenuTitle || 'Student Master' }}
-            </h2>
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{ action.MenuTitle }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle }}</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-sm-4 mb-3">
+      <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+        data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">
+        New Student
+      </button>
+    </div>
+  </div>
 
-            <div class="page-breadcrumb">
-                <a routerLink="/admin/admin-dashboard">Home</a>
-                <i class="pi pi-angle-right"></i>
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body">
 
-                <span>{{ action.ParentMenuTitle || 'Academic' }}</span>
-                <i class="pi pi-angle-right"></i>
-
-                <span class="active">
-                    {{ action.MenuTitle || 'Student' }}
-                </span>
-            </div>
+        <!-- Filters -->
+        <div class="row mb-3">
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Session</mat-label>
+              <mat-select [(ngModel)]="Filter.SessionId" (selectionChange)="getStudentList()">
+                <mat-option [value]="null">All Sessions</mat-option>
+                <mat-option *ngFor="let s of SessionList" [value]="s.SessionId">
+                  {{ s.SessionName }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Class</mat-label>
+              <mat-select [(ngModel)]="Filter.ClassId" (selectionChange)="onFilterClassChange()">
+                <mat-option [value]="null">All Classes</mat-option>
+                <mat-option *ngFor="let c of ClassList" [value]="c.ClassId">{{ c.ClassName }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Section</mat-label>
+              <mat-select [(ngModel)]="Filter.SectionId" (selectionChange)="getStudentList()">
+                <mat-option [value]="null">All Sections</mat-option>
+                <mat-option *ngFor="let s of SectionList" [value]="s.SectionId">{{ s.SectionName }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-2 d-flex align-items-center">
+            <button mat-stroked-button color="warn" (click)="clearFilter()">Clear</button>
+          </div>
         </div>
+
+        <div class="table-container overflow-auto">
+          <div class="dataTable-top">
+            <div class="dataTable-dropdown d-flex">
+              <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                <option *ngFor="let option of PageSize" [value]="option">{{ option }}</option>
+              </select>
+              <span class="ms-2">Entries per page</span>
+            </div>
+            <div class="dataTable-search">
+              <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                placeholder="Search..." type="text">
+            </div>
+          </div>
+
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th style="cursor:pointer;" (click)="sort('AdmissionNo')">Admission No</th>
+                <th style="cursor:pointer;" (click)="sort('StudentName')">Student Name</th>
+                <th style="cursor:pointer;" (click)="sort('ClassName')">Class</th>
+                <th style="cursor:pointer;" (click)="sort('SectionName')">Section</th>
+                <th style="cursor:pointer;" (click)="sort('Gender')">Gender</th>
+                <th style="cursor:pointer;" (click)="sort('MobileNo')">Mobile</th>
+                <th style="cursor:pointer;" (click)="sort('Status')">Status</th>
+                <th *ngIf="action.CanEdit">Edit</th>
+                <th *ngIf="action.CanDelete">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of StudentList | filter:Search | orderBy:sortKey:reverse | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index">
+                <td>{{ (p - 1) * itemPerPage + i + 1 }}</td>
+                <td>{{ item.AdmissionNo }}</td>
+                <td>{{ item.StudentName }}</td>
+                <td>{{ item.ClassName }}</td>
+                <td>{{ item.SectionName || '-' }}</td>
+                <td>{{ getGenderName(item.Gender) }}</td>
+                <td>{{ item.MobileNo || '-' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="item.Status == 1 ? 'bg-success' : 'bg-danger'">
+                    {{ getStatusName(item.Status) }}
+                  </span>
+                </td>
+                <td *ngIf="action.CanEdit">
+                  <button mat-icon-button color="primary" data-bs-toggle="modal"
+                    data-bs-target="#staticBackdrop" (click)="editStudent(item)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </td>
+                <td *ngIf="action.CanDelete">
+                  <button mat-icon-button color="warn" (click)="deleteStudent(item)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="StudentList.length == 0">
+                <td colspan="10" class="text-center">No records found</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="dataTable-bottom">
+            <pagination-controls (pageChange)="onTableDataChange($event)"></pagination-controls>
+          </div>
+        </div>
+      </div>
     </div>
-
-
-    <!-- Main CRUD Card -->
-    <div class="card student-crud-card">
-
-        <!-- Verona Style Toolbar -->
-        <p-toolbar styleClass="crud-toolbar">
-
-            <ng-template pTemplate="start">
-
-                <button
-                    pButton
-                    pRipple
-                    label="New Student"
-                    icon="pi pi-plus"
-                    class="p-button-success mr-2"
-                    *ngIf="action.CanCreate"
-                    (click)="openNew()">
-                </button>
-
-                <button
-                    pButton
-                    pRipple
-                    label="Clear"
-                    icon="pi pi-filter-slash"
-                    class="p-button-outlined p-button-secondary"
-                    (click)="clearFilter()">
-                </button>
-
-            </ng-template>
-
-        </p-toolbar>
-
-
-        <!-- Table -->
-        <p-table
-            #dt
-            [value]="StudentList"
-            [rows]="15"
-            [paginator]="true"
-            [globalFilterFields]="[
-                'AdmissionNo',
-                'StudentName',
-                'MobileNo',
-                'ClassName',
-                'SectionName'
-            ]"
-            [rowHover]="true"
-            dataKey="StudentId"
-            [loading]="dataLoading"
-            [showCurrentPageReport]="true"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} students"
-            [rowsPerPageOptions]="[15,25,50,100]"
-            responsiveLayout="scroll"
-            styleClass="student-table">
-
-
-            <!-- Table Top Area -->
-            <ng-template pTemplate="caption">
-
-                <div class="table-caption">
-
-                    <!-- Left -->
-                    <div>
-                        <h5 class="m-0 table-title">
-                            Manage Students
-                        </h5>
-
-                        <span class="table-subtitle">
-                            View, search and manage student records
-                        </span>
-                    </div>
-
-
-                    <!-- Right -->
-                    <div class="table-controls">
-
-                        <!-- Class -->
-                        <p-dropdown
-                            [options]="ClassList"
-                            [(ngModel)]="Filter.ClassId"
-                            optionLabel="ClassName"
-                            optionValue="ClassId"
-                            placeholder="All Classes"
-                            [showClear]="true"
-                            (onChange)="onFilterClassChange()"
-                            styleClass="filter-dropdown">
-                        </p-dropdown>
-
-
-                        <!-- Section -->
-                        <p-dropdown
-                            [options]="SectionList"
-                            [(ngModel)]="Filter.SectionId"
-                            optionLabel="SectionName"
-                            optionValue="SectionId"
-                            placeholder="All Sections"
-                            [showClear]="true"
-                            (onChange)="getStudentList()"
-                            styleClass="filter-dropdown">
-                        </p-dropdown>
-
-
-                        <!-- Search -->
-                        <span class="p-input-icon-left global-search">
-
-                            <i class="pi pi-search"></i>
-
-                            <input
-                                pInputText
-                                type="text"
-                                #searchInput
-                                (input)="dt.filterGlobal(searchInput.value,'contains')"
-                                placeholder="Search student..." />
-
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </ng-template>
-
-
-            <!-- Header -->
-            <ng-template pTemplate="header">
-
-                <tr>
-
-                    <th style="width: 4rem">
-                        #
-                    </th>
-
-                    <th pSortableColumn="AdmissionNo">
-                        Admission No
-                        <p-sortIcon field="AdmissionNo"></p-sortIcon>
-                    </th>
-
-                    <th pSortableColumn="StudentName">
-                        Student
-                        <p-sortIcon field="StudentName"></p-sortIcon>
-                    </th>
-
-                    <th pSortableColumn="ClassName">
-                        Class
-                        <p-sortIcon field="ClassName"></p-sortIcon>
-                    </th>
-
-                    <th pSortableColumn="SectionName">
-                        Section
-                        <p-sortIcon field="SectionName"></p-sortIcon>
-                    </th>
-
-                    <th pSortableColumn="Gender">
-                        Gender
-                        <p-sortIcon field="Gender"></p-sortIcon>
-                    </th>
-
-                    <th pSortableColumn="MobileNo">
-                        Mobile
-                        <p-sortIcon field="MobileNo"></p-sortIcon>
-                    </th>
-
-                    <th pSortableColumn="Status">
-                        Status
-                        <p-sortIcon field="Status"></p-sortIcon>
-                    </th>
-
-                    <th
-                        class="text-center"
-                        style="width: 8rem"
-                        *ngIf="action.CanEdit || action.CanDelete">
-
-                        Actions
-
-                    </th>
-
-                </tr>
-
-            </ng-template>
-
-
-            <!-- Body -->
-            <ng-template
-                pTemplate="body"
-                let-item
-                let-i="rowIndex">
-
-                <tr>
-
-                    <td>
-                        {{ i + 1 }}
-                    </td>
-
-
-                    <!-- Admission -->
-                    <td>
-
-                        <span class="admission-number">
-                            {{ item.AdmissionNo }}
-                        </span>
-
-                    </td>
-
-
-                    <!-- Student -->
-                    <td>
-
-                        <div class="student-info">
-
-                            <div class="student-avatar">
-
-                                {{ item.StudentName?.charAt(0)?.toUpperCase() }}
-
-                            </div>
-
-                            <div>
-
-                                <div class="student-name">
-                                    {{ item.StudentName }}
-                                </div>
-
-                                <div
-                                    class="student-email"
-                                    *ngIf="item.Email">
-
-                                    {{ item.Email }}
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </td>
-
-
-                    <td>
-                        {{ item.ClassName || '-' }}
-                    </td>
-
-                    <td>
-                        {{ item.SectionName || '-' }}
-                    </td>
-
-
-                    <!-- Gender -->
-                    <td>
-
-                        <span class="gender-wrapper">
-
-                            <i
-                                class="pi"
-                                [ngClass]="
-                                    item.Gender === 'Male'
-                                    ? 'pi-mars text-primary'
-                                    : 'pi-venus text-pink-500'
-                                ">
-                            </i>
-
-                            {{ item.Gender || '-' }}
-
-                        </span>
-
-                    </td>
-
-
-                    <td>
-                        {{ item.MobileNo || '-' }}
-                    </td>
-
-
-                    <!-- Status -->
-                    <td>
-
-                        <p-tag
-                            [value]="item.Status ? 'Active' : 'Inactive'"
-                            [severity]="item.Status ? 'success' : 'danger'">
-                        </p-tag>
-
-                    </td>
-
-
-                    <!-- Actions -->
-                    <td
-                        class="text-center"
-                        *ngIf="action.CanEdit || action.CanDelete">
-
-                        <div class="action-buttons">
-
-                            <button
-                                pButton
-                                pRipple
-                                icon="pi pi-pencil"
-                                class="
-                                    p-button-rounded
-                                    p-button-text
-                                    p-button-success
-                                "
-                                *ngIf="action.CanEdit"
-                                (click)="editStudent(item)"
-                                pTooltip="Edit Student"
-                                tooltipPosition="top">
-                            </button>
-
-
-                            <button
-                                pButton
-                                pRipple
-                                icon="pi pi-trash"
-                                class="
-                                    p-button-rounded
-                                    p-button-text
-                                    p-button-danger
-                                "
-                                *ngIf="action.CanDelete"
-                                (click)="deleteStudent(item)"
-                                pTooltip="Delete Student"
-                                tooltipPosition="top">
-                            </button>
-
-                        </div>
-
-                    </td>
-
-                </tr>
-
-            </ng-template>
-
-
-            <!-- Empty -->
-            <ng-template pTemplate="emptymessage">
-
-                <tr>
-
-                    <td
-                        colspan="9"
-                        class="empty-table">
-
-                        <div class="empty-icon">
-
-                            <i class="pi pi-users"></i>
-
-                        </div>
-
-                        <h5>No students found</h5>
-
-                        <p>
-                            Try changing your filters or add a new student.
-                        </p>
-
-                    </td>
-
-                </tr>
-
-            </ng-template>
-
-        </p-table>
-
+  </section>
+
+  <!-- Modal -->
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
+    tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">
+            {{ Student.StudentId > 0 ? 'Update' : 'New' }} Student
+          </h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"
+            aria-label="Close" (click)="resetForm()"></button>
+        </div>
+        <div class="modal-body">
+          <form #formStudent="ngForm">
+            <div class="row">
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Admission No</mat-label>
+                <input matInput name="AdmissionNo" [(ngModel)]="Student.AdmissionNo"
+                  required [readonly]="Student.StudentId > 0" autofocus>
+                <mat-error>Admission No is <strong>required</strong></mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Student Name</mat-label>
+                <input matInput name="StudentName" [(ngModel)]="Student.StudentName" required>
+                <mat-error>Student Name is <strong>required</strong></mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Roll No</mat-label>
+                <input matInput name="RollNo" [(ngModel)]="Student.RollNo">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Session</mat-label>
+                <mat-select name="SessionId" [(ngModel)]="Student.SessionId">
+                  <mat-option [value]="null">-- Select --</mat-option>
+                  <mat-option *ngFor="let s of SessionList" [value]="s.SessionId">
+                    {{ s.SessionName }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Class</mat-label>
+                <mat-select name="ClassId" [(ngModel)]="Student.ClassId" required
+                  (selectionChange)="onClassChange()">
+                  <mat-option *ngFor="let c of ClassList" [value]="c.ClassId">{{ c.ClassName }}</mat-option>
+                </mat-select>
+                <mat-error>Class is <strong>required</strong></mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Section</mat-label>
+                <mat-select name="SectionId" [(ngModel)]="Student.SectionId">
+                  <mat-option [value]="null">-- Select --</mat-option>
+                  <mat-option *ngFor="let s of SectionList" [value]="s.SectionId">{{ s.SectionName }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Gender</mat-label>
+                <mat-select name="Gender" [(ngModel)]="Student.Gender">
+                  <mat-option *ngFor="let g of genderOptions" [value]="g.Key">{{ g.Value }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Date of Birth</mat-label>
+                <input matInput [matDatepicker]="dobPicker" name="DOB" [(ngModel)]="Student.DOB">
+                <mat-datepicker-toggle matSuffix [for]="dobPicker"></mat-datepicker-toggle>
+                <mat-datepicker #dobPicker></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Admission Date</mat-label>
+                <input matInput [matDatepicker]="admPicker" name="AdmissionDate" [(ngModel)]="Student.AdmissionDate">
+                <mat-datepicker-toggle matSuffix [for]="admPicker"></mat-datepicker-toggle>
+                <mat-datepicker #admPicker></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Blood Group</mat-label>
+                <mat-select name="BloodGroup" [(ngModel)]="Student.BloodGroup">
+                  <mat-option [value]="null">-- Select --</mat-option>
+                  <mat-option *ngFor="let b of bloodGroupOptions" [value]="b.Key">{{ b.Value }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Mobile No</mat-label>
+                <input matInput name="MobileNo" [(ngModel)]="Student.MobileNo">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Email</mat-label>
+                <input matInput name="Email" [(ngModel)]="Student.Email">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Status</mat-label>
+                <mat-select name="Status" [(ngModel)]="Student.Status" required>
+                  <mat-option *ngFor="let s of StatusList" [value]="s.Key">{{ s.Value }}</mat-option>
+                </mat-select>
+                <mat-error>Status is <strong>required</strong></mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Category</mat-label>
+                <input matInput name="Category" [(ngModel)]="Student.Category"
+                  placeholder="General / OBC / SC / ST">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Religion</mat-label>
+                <input matInput name="Religion" [(ngModel)]="Student.Religion">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Aadhar No</mat-label>
+                <input matInput name="AadharNo" [(ngModel)]="Student.AadharNo" maxlength="12">
+              </mat-form-field>
+
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" mat-raised-button color="warn" class="me-2"
+            data-bs-dismiss="modal" (click)="resetForm()">Cancel</button>
+          <button mat-raised-button color="primary" (click)="saveStudent()">
+            {{ Student.StudentId > 0 ? 'Update' : 'Submit' }}
+          </button>
+        </div>
+      </div>
     </div>
-
-
-    <!-- ============================= -->
-    <!-- ADD / EDIT STUDENT DIALOG -->
-    <!-- ============================= -->
-
-    <p-dialog
-        [(visible)]="displayDialog"
-        [modal]="true"
-        [draggable]="false"
-        [resizable]="false"
-        [style]="{ width: '56rem' }"
-        [breakpoints]="{
-            '1199px': '75vw',
-            '575px': '95vw'
-        }"
-        (onHide)="hideDialog()"
-        styleClass="student-dialog">
-
-
-        <!-- Custom Dialog Header -->
-        <ng-template pTemplate="header">
-
-            <div class="dialog-heading">
-
-                <div class="dialog-icon">
-
-                    <i
-                        class="pi"
-                        [ngClass]="
-                            Student.StudentId > 0
-                            ? 'pi-user-edit'
-                            : 'pi-user-plus'
-                        ">
-                    </i>
-
-                </div>
-
-                <div>
-
-                    <h4>
-                        {{
-                            Student.StudentId > 0
-                            ? 'Update Student'
-                            : 'Add New Student'
-                        }}
-                    </h4>
-
-                    <span>
-
-                        {{
-                            Student.StudentId > 0
-                            ? 'Update student information'
-                            : 'Enter student information below'
-                        }}
-
-                    </span>
-
-                </div>
-
-            </div>
-
-        </ng-template>
-
-
-        <form
-            #formStudent="ngForm"
-            class="student-form">
-
-
-            <!-- BASIC INFORMATION -->
-            <div class="form-section">
-
-                <div class="section-heading">
-
-                    <i class="pi pi-user"></i>
-
-                    <div>
-                        <h5>Basic Information</h5>
-                        <span>Student academic details</span>
-                    </div>
-
-                </div>
-
-
-                <div class="row g-3">
-
-                    <!-- Admission -->
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-
-                            Admission No
-
-                            <span class="required">*</span>
-
-                        </label>
-
-                        <input
-                            pInputText
-                            name="AdmissionNo"
-                            [(ngModel)]="Student.AdmissionNo"
-                            [required]="true"
-                            [disabled]="Student.StudentId > 0"
-                            placeholder="e.g. SIA2026001"
-                            class="w-100" />
-
-                    </div>
-
-
-                    <!-- Name -->
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-
-                            Student Name
-
-                            <span class="required">*</span>
-
-                        </label>
-
-                        <input
-                            pInputText
-                            name="StudentName"
-                            [(ngModel)]="Student.StudentName"
-                            [required]="true"
-                            placeholder="Enter full name"
-                            class="w-100"
-                            autofocus />
-
-                    </div>
-
-
-                    <!-- Roll -->
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-                            Roll No
-                        </label>
-
-                        <input
-                            pInputText
-                            name="RollNo"
-                            [(ngModel)]="Student.RollNo"
-                            placeholder="Enter roll number"
-                            class="w-100" />
-
-                    </div>
-
-
-                    <!-- Class -->
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-
-                            Class
-
-                            <span class="required">*</span>
-
-                        </label>
-
-                        <p-dropdown
-                            name="ClassId"
-                            [options]="ClassList"
-                            [(ngModel)]="Student.ClassId"
-                            optionLabel="ClassName"
-                            optionValue="ClassId"
-                            placeholder="Select Class"
-                            [filter]="true"
-                            [required]="true"
-                            (onChange)="onClassChange()"
-                            styleClass="w-100">
-                        </p-dropdown>
-
-                    </div>
-
-
-                    <!-- Section -->
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-                            Section
-                        </label>
-
-                        <p-dropdown
-                            name="SectionId"
-                            [options]="SectionList"
-                            [(ngModel)]="Student.SectionId"
-                            optionLabel="SectionName"
-                            optionValue="SectionId"
-                            placeholder="Select Section"
-                            [showClear]="true"
-                            styleClass="w-100">
-                        </p-dropdown>
-
-                    </div>
-
-
-                    <!-- Admission Date -->
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-                            Admission Date
-                        </label>
-
-                        <p-calendar
-                            name="AdmissionDate"
-                            [(ngModel)]="Student.AdmissionDate"
-                            dateFormat="dd-mm-yy"
-                            [showIcon]="true"
-                            placeholder="DD-MM-YYYY"
-                            styleClass="w-100">
-                        </p-calendar>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- PERSONAL INFORMATION -->
-            <div class="form-section">
-
-                <div class="section-heading">
-
-                    <i class="pi pi-id-card"></i>
-
-                    <div>
-                        <h5>Personal Information</h5>
-                        <span>Personal and identification details</span>
-                    </div>
-
-                </div>
-
-
-                <div class="row g-3">
-
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-                            Gender
-                        </label>
-
-                        <p-dropdown
-                            name="Gender"
-                            [options]="genderOptions"
-                            [(ngModel)]="Student.Gender"
-                            optionLabel="label"
-                            optionValue="value"
-                            placeholder="Select Gender"
-                            styleClass="w-100">
-                        </p-dropdown>
-
-                    </div>
-
-
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-                            Date of Birth
-                        </label>
-
-                        <p-calendar
-                            name="DOB"
-                            [(ngModel)]="Student.DOB"
-                            dateFormat="dd-mm-yy"
-                            [showIcon]="true"
-                            placeholder="DD-MM-YYYY"
-                            styleClass="w-100">
-                        </p-calendar>
-
-                    </div>
-
-
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-                            Blood Group
-                        </label>
-
-                        <p-dropdown
-                            name="BloodGroup"
-                            [options]="bloodGroupOptions"
-                            [(ngModel)]="Student.BloodGroup"
-                            optionLabel="label"
-                            optionValue="value"
-                            placeholder="Select Blood Group"
-                            [showClear]="true"
-                            styleClass="w-100">
-                        </p-dropdown>
-
-                    </div>
-
-
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-                            Category
-                        </label>
-
-                        <input
-                            pInputText
-                            name="Category"
-                            [(ngModel)]="Student.Category"
-                            placeholder="General / OBC / SC / ST"
-                            class="w-100" />
-
-                    </div>
-
-
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-                            Religion
-                        </label>
-
-                        <input
-                            pInputText
-                            name="Religion"
-                            [(ngModel)]="Student.Religion"
-                            placeholder="Enter religion"
-                            class="w-100" />
-
-                    </div>
-
-
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-                            Aadhar No
-                        </label>
-
-                        <input
-                            pInputText
-                            name="AadharNo"
-                            [(ngModel)]="Student.AadharNo"
-                            maxlength="12"
-                            placeholder="12 digit Aadhar number"
-                            class="w-100" />
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- CONTACT -->
-            <div class="form-section">
-
-                <div class="section-heading">
-
-                    <i class="pi pi-phone"></i>
-
-                    <div>
-                        <h5>Contact & Status</h5>
-                        <span>Contact information and current status</span>
-                    </div>
-
-                </div>
-
-
-                <div class="row g-3">
-
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-                            Mobile No
-                        </label>
-
-                        <span class="p-input-icon-left w-100">
-
-                            <i class="pi pi-phone"></i>
-
-                            <input
-                                pInputText
-                                name="MobileNo"
-                                [(ngModel)]="Student.MobileNo"
-                                maxlength="15"
-                                placeholder="Mobile number"
-                                class="w-100" />
-
-                        </span>
-
-                    </div>
-
-
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-                            Email
-                        </label>
-
-                        <span class="p-input-icon-left w-100">
-
-                            <i class="pi pi-envelope"></i>
-
-                            <input
-                                pInputText
-                                name="Email"
-                                [(ngModel)]="Student.Email"
-                                placeholder="student@example.com"
-                                class="w-100" />
-
-                        </span>
-
-                    </div>
-
-
-                    <div class="col-lg-4 col-md-6">
-
-                        <label class="form-label">
-
-                            Status
-
-                            <span class="required">*</span>
-
-                        </label>
-
-                        <p-dropdown
-                            name="Status"
-                            [options]="statusOptions"
-                            [(ngModel)]="Student.Status"
-                            optionLabel="label"
-                            optionValue="value"
-                            [required]="true"
-                            placeholder="Select Status"
-                            styleClass="w-100">
-                        </p-dropdown>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </form>
-
-
-        <!-- Footer -->
-        <ng-template pTemplate="footer">
-
-            <div class="dialog-footer">
-
-                <button
-                    pButton
-                    pRipple
-                    label="Cancel"
-                    icon="pi pi-times"
-                    class="p-button-text p-button-secondary"
-                    (click)="hideDialog()">
-                </button>
-
-
-                <button
-                    pButton
-                    pRipple
-                    [label]="
-                        Student.StudentId > 0
-                        ? 'Update Student'
-                        : 'Save Student'
-                    "
-                    [icon]="
-                        Student.StudentId > 0
-                        ? 'pi pi-check'
-                        : 'pi pi-save'
-                    "
-                    class="p-button-success"
-                    [disabled]="formStudent.invalid"
-                    (click)="saveStudent()">
-                </button>
-
-            </div>
-
-        </ng-template>
-
-    </p-dialog>
+  </div>
 
 </main>
