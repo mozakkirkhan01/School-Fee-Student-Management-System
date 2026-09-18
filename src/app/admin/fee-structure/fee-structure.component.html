@@ -1,0 +1,216 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{ action.MenuTitle }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle }}</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-sm-4 mb-3">
+      <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+        data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">
+        New Fee Structure
+      </button>
+    </div>
+  </div>
+
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body">
+
+        <!-- Filter -->
+        <div class="row mb-3">
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Academic Year</mat-label>
+              <mat-select [(ngModel)]="Filter.AcademicYearId" (selectionChange)="getFeeStructureList()">
+                <mat-option [value]="null">All</mat-option>
+                <mat-option *ngFor="let y of AcademicYearList" [value]="y.AcademicYearId">
+                  {{ y.AcademicYear }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Class</mat-label>
+              <mat-select [(ngModel)]="Filter.ClassId" (selectionChange)="getFeeStructureList()">
+                <mat-option [value]="null">All</mat-option>
+                <mat-option *ngFor="let c of ClassList" [value]="c.ClassId">
+                  {{ c.ClassName }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-2 d-flex align-items-center">
+            <button mat-stroked-button color="warn" (click)="clearFilter()">Clear</button>
+          </div>
+        </div>
+
+        <div class="table-container overflow-auto">
+          <div class="dataTable-top">
+            <div class="dataTable-dropdown d-flex">
+              <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                <option *ngFor="let option of PageSize" [value]="option">{{ option }}</option>
+              </select>
+              <span class="ms-2">Entries per page</span>
+            </div>
+            <div class="dataTable-search">
+              <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                placeholder="Search..." type="text">
+            </div>
+          </div>
+
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th style="cursor:pointer;" (click)="sort('AcademicYear')">Academic Year</th>
+                <th style="cursor:pointer;" (click)="sort('ClassName')">Class</th>
+                <th style="cursor:pointer;" (click)="sort('FeeHeadName')">Fee Head</th>
+                <th style="cursor:pointer;" (click)="sort('Amount')">Amount</th>
+                <th>Due Day</th>
+                <th>Late Fee</th>
+                <th style="cursor:pointer;" (click)="sort('Status')">Status</th>
+                <th *ngIf="action.CanEdit">Edit</th>
+                <th *ngIf="action.CanDelete">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of FeeStructureList | filter:Search | orderBy:sortKey:reverse | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index">
+                <td>{{ (p - 1) * itemPerPage + i + 1 }}</td>
+                <td>{{ item.AcademicYear }}</td>
+                <td>{{ item.ClassName }}</td>
+                <td>{{ item.FeeHeadName }}</td>
+                <td class="text-end fw-semibold">₹ {{ item.Amount | number:'1.2-2' }}</td>
+                <td>{{ item.DueDay || '-' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="item.LateFeeApplicable ? 'bg-warning text-dark' : 'bg-secondary'">
+                    {{ item.LateFeeApplicable ? 'Yes' : 'No' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="item.Status == 1 || item.Status === true ? 'bg-success' : 'bg-danger'">
+                    {{ item.Status == 1 || item.Status === true ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td *ngIf="action.CanEdit">
+                  <button mat-icon-button color="primary" data-bs-toggle="modal"
+                    data-bs-target="#staticBackdrop" (click)="editFeeStructure(item)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </td>
+                <td *ngIf="action.CanDelete">
+                  <button mat-icon-button color="warn" (click)="deleteFeeStructure(item)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="FeeStructureList.length == 0">
+                <td colspan="10" class="text-center">No records found</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="dataTable-bottom">
+            <pagination-controls (pageChange)="onTableDataChange($event)"></pagination-controls>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
+    tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">
+            {{ FeeStructure.FeeStructureId > 0 ? 'Update' : 'New' }} Fee Structure
+          </h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"
+            aria-label="Close" (click)="resetForm()"></button>
+        </div>
+        <div class="modal-body">
+          <form #formFeeStructure="ngForm">
+            <div class="row">
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Academic Year</mat-label>
+                <mat-select name="AcademicYearId" [(ngModel)]="FeeStructure.AcademicYearId" required>
+                  <mat-option *ngFor="let y of AcademicYearList" [value]="y.AcademicYearId">
+                    {{ y.AcademicYear }}
+                  </mat-option>
+                </mat-select>
+                <mat-error>Academic Year is <strong>required</strong></mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Class</mat-label>
+                <mat-select name="ClassId" [(ngModel)]="FeeStructure.ClassId" required>
+                  <mat-option *ngFor="let c of ClassList" [value]="c.ClassId">
+                    {{ c.ClassName }}
+                  </mat-option>
+                </mat-select>
+                <mat-error>Class is <strong>required</strong></mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Fee Head</mat-label>
+                <mat-select name="FeeHeadId" [(ngModel)]="FeeStructure.FeeHeadId" required>
+                  <mat-option *ngFor="let f of FeeHeadList" [value]="f.FeeHeadId">
+                    {{ f.FeeHeadName }}
+                  </mat-option>
+                </mat-select>
+                <mat-error>Fee Head is <strong>required</strong></mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Amount (₹)</mat-label>
+                <input matInput type="number" name="Amount" [(ngModel)]="FeeStructure.Amount"
+                  required min="0" placeholder="0.00">
+                <mat-error>Amount is <strong>required</strong></mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Due Day (of month)</mat-label>
+                <input matInput type="number" name="DueDay" [(ngModel)]="FeeStructure.DueDay"
+                  min="1" max="28" placeholder="e.g. 10">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Status</mat-label>
+                <mat-select name="Status" [(ngModel)]="FeeStructure.Status" required>
+                  <mat-option *ngFor="let s of StatusList" [value]="s.Key">{{ s.Value }}</mat-option>
+                </mat-select>
+                <mat-error>Status is <strong>required</strong></mat-error>
+              </mat-form-field>
+
+              <div class="col-sm-12 mt-2">
+                <mat-checkbox name="LateFeeApplicable" [(ngModel)]="FeeStructure.LateFeeApplicable">
+                  Late Fee Applicable
+                </mat-checkbox>
+              </div>
+
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" mat-raised-button color="warn" class="me-2"
+            data-bs-dismiss="modal" (click)="resetForm()">Cancel</button>
+          <button mat-raised-button color="primary" (click)="saveFeeStructure()">
+            {{ FeeStructure.FeeStructureId > 0 ? 'Update' : 'Submit' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
