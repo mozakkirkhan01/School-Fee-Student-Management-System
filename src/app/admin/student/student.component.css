@@ -1,0 +1,430 @@
+/* =========================================================
+   PAGE
+========================================================= */
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.page-title {
+    margin: 0 0 6px;
+    font-size: 1.65rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.page-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: var(--text-color-secondary);
+}
+
+.page-breadcrumb a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.page-breadcrumb .pi {
+    font-size: 0.7rem;
+}
+
+.page-breadcrumb .active {
+    color: var(--text-color);
+}
+
+
+/* =========================================================
+   MAIN CARD
+========================================================= */
+
+.student-crud-card {
+    background: var(--surface-card);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--surface-border);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+:host ::ng-deep .crud-toolbar {
+    background: transparent;
+    border: none;
+    padding: 0 0 1.25rem 0;
+}
+
+
+/* =========================================================
+   TABLE CAPTION
+========================================================= */
+
+.table-caption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.table-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.table-subtitle {
+    display: block;
+    margin-top: 4px;
+    color: var(--text-color-secondary);
+    font-size: 0.85rem;
+}
+
+.table-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+:host ::ng-deep .filter-dropdown {
+    width: 165px;
+}
+
+.global-search input {
+    width: 240px;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+:host ::ng-deep .student-table .p-datatable-header {
+    padding: 1rem 0;
+    background: transparent;
+    border-width: 1px 0 1px 0;
+}
+
+:host ::ng-deep .student-table .p-datatable-thead > tr > th {
+    background: var(--surface-ground);
+    color: var(--text-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.9rem 1rem;
+    border-color: var(--surface-border);
+    white-space: nowrap;
+}
+
+:host ::ng-deep .student-table .p-datatable-tbody > tr > td {
+    padding: 0.85rem 1rem;
+    vertical-align: middle;
+    border-color: var(--surface-border);
+}
+
+:host ::ng-deep .student-table .p-datatable-tbody > tr {
+    transition: background-color 0.15s ease;
+}
+
+:host ::ng-deep .student-table .p-datatable-tbody > tr:hover {
+    background: var(--surface-hover);
+}
+
+
+/* =========================================================
+   STUDENT
+========================================================= */
+
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.student-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--primary-color);
+    color: var(--primary-color-text);
+
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.student-name {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.student-email {
+    margin-top: 2px;
+    font-size: 0.78rem;
+    color: var(--text-color-secondary);
+}
+
+.admission-number {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.gender-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.empty-table {
+    text-align: center;
+    padding: 3.5rem !important;
+    color: var(--text-color-secondary);
+}
+
+.empty-icon {
+    width: 60px;
+    height: 60px;
+    margin: auto auto 1rem;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 50%;
+    background: var(--surface-ground);
+}
+
+.empty-icon i {
+    font-size: 1.7rem;
+    color: var(--primary-color);
+}
+
+.empty-table h5 {
+    color: var(--text-color);
+    margin-bottom: 0.4rem;
+}
+
+.empty-table p {
+    margin: 0;
+}
+
+
+/* =========================================================
+   DIALOG
+========================================================= */
+
+:host ::ng-deep .student-dialog .p-dialog-header {
+    padding: 1.4rem 1.5rem;
+    border-bottom: 1px solid var(--surface-border);
+}
+
+:host ::ng-deep .student-dialog .p-dialog-content {
+    padding: 1.5rem;
+}
+
+:host ::ng-deep .student-dialog .p-dialog-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--surface-border);
+}
+
+
+/* =========================================================
+   DIALOG HEADER
+========================================================= */
+
+.dialog-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+.dialog-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: var(--primary-50);
+    color: var(--primary-color);
+}
+
+.dialog-icon i {
+    font-size: 1.2rem;
+}
+
+.dialog-heading h4 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.dialog-heading span {
+    display: block;
+    margin-top: 3px;
+    color: var(--text-color-secondary);
+    font-size: 0.82rem;
+}
+
+
+/* =========================================================
+   FORM SECTIONS
+========================================================= */
+
+.form-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 1.2rem;
+}
+
+.section-heading > i {
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.section-heading h5 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.section-heading span {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.78rem;
+    color: var(--text-color-secondary);
+}
+
+
+/* =========================================================
+   INPUTS
+========================================================= */
+
+.form-label {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-size: 0.83rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.required {
+    color: var(--red-500);
+}
+
+:host ::ng-deep .student-form .p-inputtext,
+:host ::ng-deep .student-form .p-dropdown,
+:host ::ng-deep .student-form .p-calendar {
+    width: 100%;
+}
+
+:host ::ng-deep .student-form .p-calendar .p-inputtext {
+    width: 100%;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 991px) {
+
+    .table-caption {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .table-controls {
+        width: 100%;
+    }
+
+    :host ::ng-deep .filter-dropdown {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .global-search {
+        flex: 1;
+    }
+
+    .global-search input {
+        width: 100%;
+    }
+}
+
+
+@media (max-width: 575px) {
+
+    .student-crud-card {
+        padding: 1rem;
+    }
+
+    .table-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    :host ::ng-deep .filter-dropdown,
+    .global-search,
+    .global-search input {
+        width: 100%;
+    }
+
+    .page-title {
+        font-size: 1.35rem;
+    }
+}
