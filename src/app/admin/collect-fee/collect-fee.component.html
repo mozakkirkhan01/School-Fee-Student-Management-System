@@ -1,0 +1,171 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{ action.MenuTitle || 'Collect Fee' }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle || 'Fee' }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle || 'Collect Fee' }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Search Student -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row align-items-end">
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Search Student (Admission No / Name / Mobile)</mat-label>
+            <input matInput [(ngModel)]="searchText" (keyup.enter)="searchStudent()"
+              placeholder="Type and press Enter">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+        </div>
+        <div class="col-md-4 mb-3">
+          <button mat-raised-button color="primary" (click)="searchStudent()" class="me-2">Search</button>
+          <button mat-stroked-button color="warn" (click)="clearAll()">Clear</button>
+        </div>
+      </div>
+
+      <!-- Search results -->
+      <div class="list-group" *ngIf="StudentList.length > 0">
+        <a href="javascript:void(0)" class="list-group-item list-group-item-action"
+          *ngFor="let s of StudentList" (click)="selectStudent(s)">
+          <strong>{{ s.AdmissionNo }}</strong> — {{ s.StudentName }}
+          <span class="text-muted ms-2">{{ s.ClassName }} {{ s.SectionName }}</span>
+          <span class="float-end text-muted">{{ s.MobileNo }}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selected Student Info -->
+  <div class="card mb-3" *ngIf="selectedStudent">
+    <div class="card-body py-3">
+      <div class="row">
+        <div class="col-md-3"><strong>Admission No:</strong> {{ selectedStudent.AdmissionNo }}</div>
+        <div class="col-md-3"><strong>Name:</strong> {{ selectedStudent.StudentName }}</div>
+        <div class="col-md-3"><strong>Class:</strong> {{ selectedStudent.ClassName }} - {{ selectedStudent.SectionName }}</div>
+        <div class="col-md-3"><strong>Mobile:</strong> {{ selectedStudent.MobileNo || '-' }}</div>
+      </div>
+      <div class="mt-2" *ngIf="lastReceiptNo">
+        <span class="badge bg-success fs-6">Last Receipt: {{ lastReceiptNo }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending Fees + Payment -->
+  <div class="row" *ngIf="selectedStudent">
+
+    <!-- Pending list -->
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Pending Fees</span>
+          <button mat-button color="primary" (click)="selectAll()" *ngIf="PendingFeeList.length">
+            {{ selectedIds.length === PendingFeeList.length ? 'Deselect All' : 'Select All' }}
+          </button>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th style="width:40px"></th>
+                  <th>Fee Head</th>
+                  <th>Period</th>
+                  <th class="text-end">Balance</th>
+                  <th>Due Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of PendingFeeList"
+                  [class.table-primary]="isSelected(item.InstallmentId)"
+                  style="cursor:pointer" (click)="toggleSelect(item)">
+                  <td>
+                    <mat-checkbox [checked]="isSelected(item.InstallmentId)"
+                      (click)="$event.stopPropagation(); toggleSelect(item)">
+                    </mat-checkbox>
+                  </td>
+                  <td>{{ item.FeeHeadName }}</td>
+                  <td>{{ getMonthName(item.MonthNo) }} {{ item.YearNo }}</td>
+                  <td class="text-end fw-semibold">₹ {{ item.BalanceAmount | number:'1.2-2' }}</td>
+                  <td>{{ item.DueDate | date:'dd-MMM-yyyy' }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="item.PaymentStatus === 'Partial' ? 'bg-warning text-dark' : 'bg-danger'">
+                      {{ item.PaymentStatus }}
+                    </span>
+                  </td>
+                </tr>
+                <tr *ngIf="PendingFeeList.length === 0">
+                  <td colspan="6" class="text-center text-muted py-4">No pending fees</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment box -->
+    <div class="col-lg-4">
+      <div class="card border-primary">
+        <div class="card-header bg-primary text-white">Payment Details</div>
+        <div class="card-body">
+
+          <div class="mb-3">
+            <label class="form-label">Selected Amount</label>
+            <div class="fs-4 fw-bold text-primary">₹ {{ totalSelected | number:'1.2-2' }}</div>
+          </div>
+
+          <mat-form-field appearance="outline" class="w-100 mb-2">
+            <mat-label>Payment Mode</mat-label>
+            <mat-select [(ngModel)]="Payment.PaymentModeId" required>
+              <mat-option *ngFor="let m of PaymentModeList" [value]="m.PaymentModeId">
+                {{ m.PaymentMode }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-100 mb-2">
+            <mat-label>Discount (₹)</mat-label>
+            <input matInput type="number" [(ngModel)]="Payment.DiscountAmount" min="0">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-100 mb-2">
+            <mat-label>Fine (₹)</mat-label>
+            <input matInput type="number" [(ngModel)]="Payment.FineAmount" min="0">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-100 mb-2">
+            <mat-label>Transaction Ref / Cheque No</mat-label>
+            <input matInput [(ngModel)]="Payment.TransactionReference">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-100 mb-2">
+            <mat-label>Remarks</mat-label>
+            <textarea matInput rows="2" [(ngModel)]="Payment.Remarks"></textarea>
+          </mat-form-field>
+
+          <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded">
+            <span class="fw-semibold">Net Payable</span>
+            <span class="fs-5 fw-bold text-success">₹ {{ netPayable | number:'1.2-2' }}</span>
+          </div>
+
+          <button mat-raised-button color="primary" class="w-100" (click)="savePayment()"
+            [disabled]="selectedIds.length === 0">
+            <mat-icon>payment</mat-icon> Collect Fee & Generate Receipt
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
