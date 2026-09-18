@@ -1,0 +1,79 @@
+.main {
+  padding: 16px 16px 0;
+  font-size: 0.9rem;
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin: 0;
+}
+
+.card {
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.card-body {
+  padding: 0.85rem 1rem;
+}
+
+:host ::ng-deep .p-toolbar {
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+}
+
+:host ::ng-deep .p-inputtext,
+:host ::ng-deep .p-dropdown,
+:host ::ng-deep .p-inputnumber,
+:host ::ng-deep .p-tag,
+:host ::ng-deep .p-button {
+  font-size: 0.85rem;
+}
+
+:host ::ng-deep .p-inputtext,
+:host ::ng-deep .p-dropdown,
+:host ::ng-deep .p-inputnumber input {
+  height: 34px;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th,
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.5rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-header {
+  padding: 0.75rem 0.9rem;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-content {
+  padding: 0.9rem;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-footer {
+  padding: 0.6rem 0.9rem 0.9rem;
+}
+
+:host ::ng-deep .p-button {
+  padding: 0.4rem 0.75rem;
+}
+
+:host ::ng-deep .p-button.p-button-rounded {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+:host ::ng-deep .p-input-icon-left > .pi {
+  font-size: 0.8rem;
+}
+
+:host ::ng-deep .p-input-icon-left > input {
+  padding-left: 1.8rem;
+  height: 34px;
+}
+
+:host ::ng-deep .p-tag {
+  min-height: 22px;
+  line-height: 1.2;
+  padding: 0.25rem 0.5rem;
+}

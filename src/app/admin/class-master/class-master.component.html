@@ -1,138 +1,95 @@
-<app-progress *ngIf="dataLoading"></app-progress>
 <main id="main" class="main" *ngIf="action.ResponseReceived">
-
-  <div class="row">
-    <div class="pagetitle dashboard col-sm-8">
-      <h1>{{action.MenuTitle}}</h1>
-      <nav>
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
-          <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
-          <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
-        </ol>
-      </nav>
+  <div class="row mb-3">
+    <div class="col-sm-8">
+      <h1>{{ action.MenuTitle }}</h1>
     </div>
-    <div class="col-sm-4 mb-3">
-      <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
-        data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New Class</button>
+    <div class="col-sm-4 text-end">
+      <button pButton label="New Class" icon="pi pi-plus" class="p-button-success"
+        *ngIf="action.CanCreate" (click)="openNew()"></button>
     </div>
   </div>
 
-  <section class="section dashboard">
-    <div class="card">
-      <div class="card-body">
-        <div class="table-container overflow-auto">
-          <div class="dataTable-top">
-            <div class="dataTable-dropdown d-flex">
-              <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
-                <option *ngFor="let option of PageSize" [value]="option">{{option}}</option>
-              </select>
-              <span class="ms-2">Entries per page</span>
-            </div>
-            <div class="dataTable-search">
-              <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
-                placeholder="Search..." type="text">
-            </div>
-          </div>
+  <div class="card">
+    <div class="card-body">
+      <p-toolbar styleClass="mb-3">
+        <ng-template pTemplate="left">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input pInputText type="text" [(ngModel)]="searchText" placeholder="Search class..." />
+          </span>
+        </ng-template>
+      </p-toolbar>
 
-          <table class="table table-bordered table-hover">
-            <thead>
-              <tr>
-                <th>S.No</th>
-                <th style="cursor:pointer;" (click)="sort('DisplayOrder')">Order</th>
-                <th style="cursor:pointer;" (click)="sort('ClassName')">Class Name</th>
-                <th style="cursor:pointer;" (click)="sort('Status')">Status</th>
-                <th *ngIf="action.CanEdit">Edit</th>
-                <th *ngIf="action.CanDelete">Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                *ngFor="let item of ClassMasterList | filter:Search | orderBy:sortKey:reverse | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index">
-                <td>{{ (p - 1) * itemPerPage + i + 1 }}</td>
-                <td>{{ item.DisplayOrder }}</td>
-                <td>{{ item.ClassName }}</td>
-                <td>
-                  <span class="badge" [ngClass]="item.Status ? 'bg-success' : 'bg-danger'">
-                    {{ item.Status ? 'Active' : 'Inactive' }}
-                  </span>
-                </td>
-                <td *ngIf="action.CanEdit">
-                  <button mat-icon-button color="primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
-                    (click)="editClassMaster(item)">
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                </td>
-                <td *ngIf="action.CanDelete">
-                  <button mat-icon-button color="warn" (click)="deleteClassMaster(item)">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </td>
-              </tr>
-              <tr *ngIf="ClassMasterList?.length == 0">
-                <td colspan="6" class="text-center">No records found</td>
-              </tr>
-            </tbody>
-          </table>
+      <p-table #dt [value]="ClassMasterList | filter:searchText" [loading]="dataLoading" [paginator]="true" [rows]="10"
+        [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 70px">S.No</th>
+            <th>Order</th>
+            <th>Class Name</th>
+            <th>Status</th>
+            <th *ngIf="action.CanEdit || action.CanDelete" style="width: 130px">Action</th>
+          </tr>
+        </ng-template>
 
-          <div class="dataTable-bottom">
-            <pagination-controls (pageChange)="onTableDataChange($event)"></pagination-controls>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+        <ng-template pTemplate="body" let-item let-i="rowIndex">
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.DisplayOrder }}</td>
+            <td>{{ item.ClassName }}</td>
+            <td>
+              <p-tag [value]="item.Status ? 'Active' : 'Inactive'" [severity]="item.Status ? 'success' : 'danger'"></p-tag>
+            </td>
+            <td *ngIf="action.CanEdit || action.CanDelete">
+              <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-text me-1"
+                *ngIf="action.CanEdit" (click)="editClassMaster(item)"></button>
+              <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text"
+                *ngIf="action.CanDelete" (click)="deleteClassMaster(item)"></button>
+            </td>
+          </tr>
+        </ng-template>
 
-  <!-- Modal -->
-  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="staticBackdropLabel">
-            {{ ClassMaster.ClassId > 0 ? 'Update' : 'New' }} Class
-          </h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-            (click)="resetForm()"></button>
-        </div>
-        <div class="modal-body">
-          <form #formClassMaster="ngForm">
-            <div class="row">
-
-              <mat-form-field appearance="outline" class="col-sm-12">
-                <mat-label>Class Name</mat-label>
-                <input matInput name="ClassName" [(ngModel)]="ClassMaster.ClassName" required
-                  placeholder="e.g. Class 1, Nursery, LKG" autofocus>
-                <mat-error>Class Name is <strong>required</strong></mat-error>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="col-sm-6">
-                <mat-label>Display Order</mat-label>
-                <input matInput type="number" name="DisplayOrder" [(ngModel)]="ClassMaster.DisplayOrder" required>
-                <mat-error>Display Order is <strong>required</strong></mat-error>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="col-sm-6">
-                <mat-label>Status</mat-label>
-                <mat-select name="Status" [(ngModel)]="ClassMaster.Status" required>
-                  <mat-option [value]="true">Active</mat-option>
-                  <mat-option [value]="false">Inactive</mat-option>
-                </mat-select>
-                <mat-error>Status is <strong>required</strong></mat-error>
-              </mat-form-field>
-
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
-            (click)="resetForm()">Cancel</button>
-          <button mat-raised-button color="primary" (click)="saveClassMaster()">
-            {{ ClassMaster.ClassId > 0 ? 'Update' : 'Submit' }}
-          </button>
-        </div>
-      </div>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="text-center p-4">No classes found.</td>
+          </tr>
+        </ng-template>
+      </p-table>
     </div>
   </div>
 
+  <p-dialog
+    [(visible)]="displayDialog"
+    [header]="ClassMaster.ClassId > 0 ? 'Update Class' : 'New Class'"
+    [modal]="true"
+    [style]="{ width: '450px' }"
+    [draggable]="false"
+    [resizable]="false"
+    (onHide)="hideDialog()">
+
+    <form #formClassMaster="ngForm" class="p-fluid">
+      <div class="field mb-3">
+        <label>Class Name <span class="text-danger">*</span></label>
+        <input pInputText name="ClassName" [(ngModel)]="ClassMaster.ClassName" [required]="true" autofocus placeholder="e.g. Class 1, Nursery, LKG" />
+        <small class="p-error" *ngIf="isSubmitted && formClassMaster.controls['ClassName']?.invalid">
+          Class Name is required
+        </small>
+      </div>
+
+      <div class="field mb-3">
+        <label>Display Order <span class="text-danger">*</span></label>
+        <p-inputNumber name="DisplayOrder" [(ngModel)]="ClassMaster.DisplayOrder" [required]="true" [min]="0" [showButtons]="true"></p-inputNumber>
+      </div>
+
+      <div class="field mb-3">
+        <label>Status <span class="text-danger">*</span></label>
+        <p-dropdown name="Status" [options]="statusOptions" [(ngModel)]="ClassMaster.Status" optionLabel="label" optionValue="value" placeholder="Select Status" [required]="true"></p-dropdown>
+      </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+      <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+      <button pButton [label]="ClassMaster.ClassId > 0 ? 'Update' : 'Save'" icon="pi pi-check" (click)="saveClassMaster()"></button>
+    </ng-template>
+  </p-dialog>
 </main>
