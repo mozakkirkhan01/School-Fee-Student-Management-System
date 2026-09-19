@@ -1,0 +1,144 @@
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{ action.MenuTitle || 'SMS Template' }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle || 'SMS' }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle || 'Template' }}</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-sm-4 mb-3">
+      <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+        data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">
+        New Template
+      </button>
+    </div>
+  </div>
+
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body">
+        <div class="table-container overflow-auto">
+          <div class="dataTable-top">
+            <div class="dataTable-search">
+              <input class="form-control form-control-sm" [(ngModel)]="Search"
+                placeholder="Search..." style="max-width:220px">
+            </div>
+          </div>
+
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Template Name</th>
+                <th>Code</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th *ngIf="action.CanEdit">Edit</th>
+                <th *ngIf="action.CanDelete">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of SmsTemplateList | filter:Search | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index">
+                <td>{{ (p - 1) * itemPerPage + i + 1 }}</td>
+                <td>{{ item.TemplateName }}</td>
+                <td><code>{{ item.TemplateCode }}</code></td>
+                <td style="max-width:320px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  {{ item.MessageBody }}
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="item.Status == 1 || item.Status === true ? 'bg-success' : 'bg-danger'">
+                    {{ item.Status == 1 || item.Status === true ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td *ngIf="action.CanEdit">
+                  <button mat-icon-button color="primary" data-bs-toggle="modal"
+                    data-bs-target="#staticBackdrop" (click)="editSmsTemplate(item)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </td>
+                <td *ngIf="action.CanDelete">
+                  <button mat-icon-button color="warn" (click)="deleteSmsTemplate(item)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="SmsTemplateList.length == 0">
+                <td colspan="7" class="text-center">No templates found</td>
+              </tr>
+            </tbody>
+          </table>
+          <pagination-controls (pageChange)="onTableDataChange($event)"></pagination-controls>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ SmsTemplate.SmsTemplateId > 0 ? 'Update' : 'New' }} SMS Template</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" (click)="resetForm()"></button>
+        </div>
+        <div class="modal-body">
+          <form #formSmsTemplate="ngForm">
+            <div class="row">
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Template Name</mat-label>
+                <input matInput name="TemplateName" [(ngModel)]="SmsTemplate.TemplateName"
+                  required placeholder="e.g. Fee Due Reminder">
+                <mat-error>Required</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Template Code</mat-label>
+                <input matInput name="TemplateCode" [(ngModel)]="SmsTemplate.TemplateCode"
+                  required placeholder="e.g. FEE_DUE">
+                <mat-error>Required</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-12">
+                <mat-label>Message Body</mat-label>
+                <textarea matInput name="MessageBody" [(ngModel)]="SmsTemplate.MessageBody"
+                  required rows="4"
+                  placeholder="Dear Parent, fee of Rs {Amount} for {StudentName} is due on {DueDate}.">
+                </textarea>
+                <mat-error>Required</mat-error>
+              </mat-form-field>
+
+              <div class="col-sm-12 mb-2">
+                <small class="text-muted me-2">Insert placeholder:</small>
+                <button type="button" mat-stroked-button class="me-1 mb-1"
+                  *ngFor="let ph of placeholders" (click)="insertPlaceholder(ph)">
+                  {{ ph }}
+                </button>
+              </div>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Status</mat-label>
+                <mat-select name="Status" [(ngModel)]="SmsTemplate.Status" required>
+                  <mat-option *ngFor="let s of StatusList" [value]="s.Key">{{ s.Value }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button mat-raised-button color="warn" data-bs-dismiss="modal" (click)="resetForm()">Cancel</button>
+          <button mat-raised-button color="primary" (click)="saveSmsTemplate()">
+            {{ SmsTemplate.SmsTemplateId > 0 ? 'Update' : 'Submit' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
