@@ -19,6 +19,22 @@ import { ChangePasswordComponent } from './admin/change-password/change-password
 import { CompanyComponent } from './admin/company/company.component';
 import { AcademicYearComponent } from './admin/academic-year/academic-year.component';
 import { ClassMasterComponent } from './admin/class-master/class-master.component';
+import { SectionMasterComponent } from './admin/section-master/section-master.component';
+import { StudentComponent } from './admin/student/student.component';
+import { FeeHeadComponent } from './admin/fee-head/fee-head.component';
+import { FeeStructureComponent } from './admin/fee-structure/fee-structure.component';
+import { CollectFeeComponent } from './admin/collect-fee/collect-fee.component';
+import { SessionMasterComponent } from './admin/session-master/session-master.component';
+import { GenerateInstallmentComponent } from './admin/generate-installment/generate-installment.component';
+import { FeeReceiptComponent } from './admin/fee-receipt/fee-receipt.component';
+import { PendingFeeReportComponent } from './admin/pending-fee-report/pending-fee-report.component';
+import { StudentLedgerComponent } from './admin/student-ledger/student-ledger.component';
+import { ParentComponent } from './admin/parent/parent.component';
+import { SmsTemplateComponent } from './admin/sms-template/sms-template.component';
+import { FeeReminderSmsComponent } from './admin/fee-reminder-sms/fee-reminder-sms.component';
+import { SmsLogComponent } from './admin/sms-log/sms-log.component';
+import { MonthlyCollectionReportComponent } from './admin/monthly-collection-report/monthly-collection-report.component';
+import { PaymentModeComponent } from './admin/payment-mode/payment-mode.component';
 
 const routes: Routes = [
   { path: '', redirectTo: "/admin-login", pathMatch: 'full' },
@@ -42,6 +58,23 @@ const routes: Routes = [
       { path: 'company', component: CompanyComponent },
       { path: 'academic', component: AcademicYearComponent},
       { path: 'class', component:ClassMasterComponent},
+      { path: 'section', component: SectionMasterComponent},
+      { path: 'student', component: StudentComponent},
+      { path: 'fee', component: FeeHeadComponent},
+      { path: 'fee-structure', component: FeeStructureComponent},
+      { path: 'collect-fee', component: CollectFeeComponent},
+      { path: 'session-master', component: SessionMasterComponent},
+      { path: 'generate-installment', component: GenerateInstallmentComponent},
+      { path: 'fee-receipt', component: FeeReceiptComponent},
+      { path: 'pending-fee-report', component: PendingFeeReportComponent},
+      { path: 'student-ledger', component: StudentLedgerComponent},
+      { path: 'parent', component: ParentComponent},
+      { path: 'sms-template', component: SmsTemplateComponent},
+      { path: 'fee-reminder-sms', component: FeeReminderSmsComponent},
+      { path: 'sms-log', component: SmsLogComponent},
+      { path: 'monthly-collection-report', component: MonthlyCollectionReportComponent},
+      { path: 'payment-mode', component: PaymentModeComponent},
+
     ]
   },
   { path: 'page-not-found', component: PageNotFoundComponent },
