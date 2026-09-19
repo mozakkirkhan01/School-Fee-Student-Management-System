@@ -66,6 +66,26 @@ export enum Status {
     Active = 1,
     Inactive = 2
 }
+export enum FeeType {
+    OneTime =1,
+    Monthly =2,
+    Quarterly = 3,
+    Annual =4
+}
+export enum Month {
+    January =1,
+    February =2,
+    March = 3,
+    April =4,
+    May = 5,
+    June = 6,
+    July = 7,
+    August = 8,
+    September = 9,
+    October = 10,
+    November = 11,
+    December = 12
+}
 export enum BookletStatus {
     NotSale = 1,
     Sold = 2
