@@ -1,0 +1,108 @@
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{ action.MenuTitle || 'Payment Mode' }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle || 'Master' }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle || 'Payment Mode' }}</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-sm-4 mb-3">
+      <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+        data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">
+        New Payment Mode
+      </button>
+    </div>
+  </div>
+
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body">
+        <div class="table-container overflow-auto">
+          <div class="dataTable-top">
+            <input class="form-control form-control-sm" [(ngModel)]="Search"
+              placeholder="Search..." style="max-width:220px">
+          </div>
+
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Payment Mode</th>
+                <th>Status</th>
+                <th *ngIf="action.CanEdit">Edit</th>
+                <th *ngIf="action.CanDelete">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of PaymentModeList | filter:Search | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index">
+                <td>{{ (p - 1) * itemPerPage + i + 1 }}</td>
+                <td>{{ item.PaymentModeName }}</td>
+                <td>
+                  <span class="badge" [ngClass]="item.Status ? 'bg-success' : 'bg-danger'">
+                    {{ item.Status ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td *ngIf="action.CanEdit">
+                  <button mat-icon-button color="primary" data-bs-toggle="modal"
+                    data-bs-target="#staticBackdrop" (click)="editPaymentMode(item)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </td>
+                <td *ngIf="action.CanDelete">
+                  <button mat-icon-button color="warn" (click)="deletePaymentMode(item)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="PaymentModeList.length == 0">
+                <td colspan="5" class="text-center">No records found</td>
+              </tr>
+            </tbody>
+          </table>
+          <pagination-controls (pageChange)="onTableDataChange($event)"></pagination-controls>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ PaymentMode.PaymentModeId > 0 ? 'Update' : 'New' }} Payment Mode</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" (click)="resetForm()"></button>
+        </div>
+        <div class="modal-body">
+          <form #formPaymentMode="ngForm">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Payment Mode Name</mat-label>
+              <input matInput name="PaymentModeName" [(ngModel)]="PaymentMode.PaymentModeName"
+                required autofocus placeholder="e.g. Cash, UPI, Cheque">
+              <mat-error>Required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Status</mat-label>
+              <mat-select name="Status" [(ngModel)]="PaymentMode.Status" required>
+                <mat-option [value]="true">Active</mat-option>
+                <mat-option [value]="false">Inactive</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button mat-raised-button color="warn" data-bs-dismiss="modal" (click)="resetForm()">Cancel</button>
+          <button mat-raised-button color="primary" (click)="savePaymentMode()">
+            {{ PaymentMode.PaymentModeId > 0 ? 'Update' : 'Submit' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
