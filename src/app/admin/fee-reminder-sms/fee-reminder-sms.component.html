@@ -1,0 +1,100 @@
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-12">
+      <h1>{{ action.MenuTitle || 'Fee Reminder SMS' }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle || 'SMS' }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle || 'Fee Reminder' }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row align-items-end">
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Class</mat-label>
+            <mat-select [(ngModel)]="Filter.ClassId" (selectionChange)="loadPending()">
+              <mat-option [value]="null">All Classes</mat-option>
+              <mat-option *ngFor="let c of ClassList" [value]="c.ClassId">{{ c.ClassName }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>SMS Template</mat-label>
+            <mat-select [(ngModel)]="TemplateId">
+              <mat-option *ngFor="let t of TemplateList" [value]="t.SmsTemplateId">
+                {{ t.TemplateName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-5 d-flex align-items-center gap-2 flex-wrap mb-3">
+          <button mat-raised-button color="primary" (click)="sendReminder()"
+            [disabled]="selectedIds.length === 0 || !TemplateId">
+            Queue SMS ({{ selectedIds.length }})
+          </button>
+          <button mat-stroked-button (click)="selectAll()">
+            {{ selectedIds.length === PendingSmsList.length ? 'Deselect All' : 'Select All' }}
+          </button>
+          <button mat-stroked-button (click)="loadPending()">Refresh</button>
+        </div>
+      </div>
+      <small class="text-muted">
+        Uses Parent WhatsApp / Father Mobile. Students without mobile are excluded.
+      </small>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover table-sm">
+          <thead>
+            <tr>
+              <th style="width:40px"></th>
+              <th>S.No</th>
+              <th>Admission No</th>
+              <th>Student</th>
+              <th>Class</th>
+              <th>Mobile</th>
+              <th class="text-end">Pending Amount</th>
+              <th class="text-center">Installments</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of PendingSmsList | filter:Search | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index"
+              [class.table-primary]="isSelected(item.StudentId)"
+              style="cursor:pointer" (click)="toggleSelect(item.StudentId)">
+              <td>
+                <mat-checkbox [checked]="isSelected(item.StudentId)"
+                  (click)="$event.stopPropagation(); toggleSelect(item.StudentId)">
+                </mat-checkbox>
+              </td>
+              <td>{{ (p - 1) * itemPerPage + i + 1 }}</td>
+              <td>{{ item.AdmissionNo }}</td>
+              <td>{{ item.StudentName }}</td>
+              <td>{{ item.ClassName }}</td>
+              <td>{{ item.MobileNo }}</td>
+              <td class="text-end fw-semibold text-danger">₹ {{ item.TotalPending | number:'1.2-2' }}</td>
+              <td class="text-center">{{ item.PendingCount }}</td>
+            </tr>
+            <tr *ngIf="PendingSmsList.length == 0">
+              <td colspan="8" class="text-center text-muted">
+                No pending students with mobile number
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <pagination-controls (pageChange)="onTableDataChange($event)"></pagination-controls>
+      </div>
+    </div>
+  </div>
+
+</main>
