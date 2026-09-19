@@ -1,0 +1,128 @@
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-12">
+      <h1>{{ action.MenuTitle || 'Monthly Collection Report' }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle || 'Reports' }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle || 'Monthly Collection' }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <div class="card border-success">
+        <div class="card-body py-3">
+          <div class="text-muted small">Total Collection</div>
+          <div class="fs-4 fw-bold text-success">₹ {{ GrandTotal | number:'1.2-2' }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-primary">
+        <div class="card-body py-3">
+          <div class="text-muted small">Total Receipts</div>
+          <div class="fs-4 fw-bold text-primary">{{ TotalReceipts }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row align-items-end">
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Year</mat-label>
+            <mat-select [(ngModel)]="Filter.YearNo">
+              <mat-option *ngFor="let y of yearOptions()" [value]="y">{{ y }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Month (optional)</mat-label>
+            <mat-select [(ngModel)]="Filter.MonthNo">
+              <mat-option [value]="null">All Months</mat-option>
+              <mat-option *ngFor="let m of MonthList" [value]="m.Key">{{ m.Value }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3 mb-3">
+          <button mat-raised-button color="primary" (click)="loadReport()">Search</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Month-wise -->
+  <div class="card mb-3">
+    <div class="card-header fw-semibold">Month-wise Collection</div>
+    <div class="card-body p-0">
+      <table class="table table-bordered mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Month</th>
+            <th class="text-center">Receipts</th>
+            <th class="text-end">Discount</th>
+            <th class="text-end">Fine</th>
+            <th class="text-end">Collection</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of MonthlyList">
+            <td>{{ getMonthName(item.MonthNo) }} {{ item.YearNo }}</td>
+            <td class="text-center">{{ item.ReceiptCount }}</td>
+            <td class="text-end">{{ item.TotalDiscount | number:'1.2-2' }}</td>
+            <td class="text-end">{{ item.TotalFine | number:'1.2-2' }}</td>
+            <td class="text-end fw-semibold">₹ {{ item.TotalCollection | number:'1.2-2' }}</td>
+          </tr>
+          <tr *ngIf="MonthlyList.length == 0">
+            <td colspan="5" class="text-center text-muted">No data</td>
+          </tr>
+        </tbody>
+        <tfoot *ngIf="MonthlyList.length">
+          <tr class="table-light">
+            <th>Total</th>
+            <th class="text-center">{{ TotalReceipts }}</th>
+            <th></th>
+            <th></th>
+            <th class="text-end">₹ {{ GrandTotal | number:'1.2-2' }}</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Class-wise -->
+  <div class="card">
+    <div class="card-header fw-semibold">Class-wise Collection</div>
+    <div class="card-body p-0">
+      <table class="table table-bordered mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Class</th>
+            <th class="text-center">Receipts</th>
+            <th class="text-end">Collection</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of ClassWiseList">
+            <td>{{ item.ClassName }}</td>
+            <td class="text-center">{{ item.ReceiptCount }}</td>
+            <td class="text-end fw-semibold">₹ {{ item.TotalCollection | number:'1.2-2' }}</td>
+          </tr>
+          <tr *ngIf="ClassWiseList.length == 0">
+            <td colspan="3" class="text-center text-muted">No data</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
