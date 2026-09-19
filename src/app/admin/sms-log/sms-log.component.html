@@ -1,0 +1,94 @@
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-12">
+      <h1>{{ action.MenuTitle || 'SMS Log' }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle || 'SMS' }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle || 'SMS Log' }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+
+      <!-- Filters -->
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>From Date</mat-label>
+            <input matInput [matDatepicker]="fromPicker" [(ngModel)]="Filter.FromDate">
+            <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+            <mat-datepicker #fromPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>To Date</mat-label>
+            <input matInput [matDatepicker]="toPicker" [(ngModel)]="Filter.ToDate">
+            <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+            <mat-datepicker #toPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="col-md-6 d-flex align-items-center gap-2 flex-wrap mb-3">
+          <button mat-raised-button color="primary" (click)="loadList()">Search</button>
+          <button mat-stroked-button (click)="setToday()">Today</button>
+          <button mat-stroked-button color="warn" (click)="clearFilter()">Clear</button>
+        </div>
+      </div>
+
+      <div class="dataTable-top mb-2">
+        <input class="form-control form-control-sm" [(ngModel)]="Search"
+          placeholder="Search mobile / student / message..." style="max-width:280px">
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover table-sm">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Date</th>
+              <th>Admission No</th>
+              <th>Student</th>
+              <th>Mobile</th>
+              <th>Message</th>
+              <th>Status</th>
+              <th>Provider</th>
+              <th>Sent On</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of SmsLogList | filter:Search | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index">
+              <td>{{ (p - 1) * itemPerPage + i + 1 }}</td>
+              <td>{{ item.CreatedOn | date:'dd-MMM-yyyy hh:mm a' }}</td>
+              <td>{{ item.AdmissionNo || '-' }}</td>
+              <td>{{ item.StudentName || '-' }}</td>
+              <td>{{ item.ParentMobile }}</td>
+              <td style="max-width:280px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
+                  [title]="item.MessageText">
+                {{ item.MessageText }}
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(item.Status)">
+                  {{ item.Status }}
+                </span>
+              </td>
+              <td>{{ item.SmsProvider || '-' }}</td>
+              <td>{{ item.SentOn ? (item.SentOn | date:'dd-MMM-yyyy hh:mm a') : '-' }}</td>
+            </tr>
+            <tr *ngIf="SmsLogList.length == 0">
+              <td colspan="9" class="text-center text-muted">No SMS logs found</td>
+            </tr>
+          </tbody>
+        </table>
+        <pagination-controls (pageChange)="onTableDataChange($event)"></pagination-controls>
+      </div>
+
+    </div>
+  </div>
+
+</main>
