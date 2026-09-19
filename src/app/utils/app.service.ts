@@ -41,7 +41,191 @@ export class AppService {
   deleteClassMaster(obj: any) {
     return this.http.post(this.apiUrl + "ClassMaster/deleteClassMaster", obj, { headers: this.headers })
   }
+    // Section Master
+  getSectionMasterList(obj: any) {
+    return this.http.post(this.apiUrl + "SectionMaster/SectionMasterList", obj, { headers: this.headers })
+  }
+
+  saveSectionMaster(obj: any) {
+    return this.http.post(this.apiUrl + "SectionMaster/saveSectionMaster", obj, { headers: this.headers })
+  }
+
+  deleteSectionMaster(obj: any) {
+    return this.http.post(this.apiUrl + "SectionMaster/deleteSectionMaster", obj, { headers: this.headers })
+  }
+    // Student
+  getStudentList(obj: any) {
+    return this.http.post(this.apiUrl + "Student/StudentList", obj, { headers: this.headers })
+  }
+
+  saveStudent(obj: any) {
+    return this.http.post(this.apiUrl + "Student/saveStudent", obj, { headers: this.headers })
+  }
+
+  deleteStudent(obj: any) {
+    return this.http.post(this.apiUrl + "Student/deleteStudent", obj, { headers: this.headers })
+  }
+
+  // Fee Head
+  getFeeHeadList(obj: any) {
+    return this.http.post(this.apiUrl + "FeeHead/FeeHeadList", obj, { headers: this.headers })
+  }
+
+  saveFeeHead(obj: any) {
+    return this.http.post(this.apiUrl + "FeeHead/saveFeeHead", obj, { headers: this.headers })
+  }
+
+  deleteFeeHead(obj: any) {
+    return this.http.post(this.apiUrl + "FeeHead/deleteFeeHead", obj, { headers: this.headers })
+  }
+
+
+    // Fee Structure
+  getFeeStructureList(obj: any) {
+    return this.http.post(this.apiUrl + "FeeStructure/FeeStructureList", obj, { headers: this.headers })
+  }
+
+  saveFeeStructure(obj: any) {
+    return this.http.post(this.apiUrl + "FeeStructure/saveFeeStructure", obj, { headers: this.headers })
+  }
+
+  deleteFeeStructure(obj: any) {
+    return this.http.post(this.apiUrl + "FeeStructure/deleteFeeStructure", obj, { headers: this.headers })
+  }
+
+    // Fee Payment / Collect Fee
+  searchStudentForFee(obj: any) {
+    return this.http.post(this.apiUrl + "FeePayment/SearchStudent", obj, { headers: this.headers })
+  }
+
+  getPendingFees(obj: any) {
+    return this.http.post(this.apiUrl + "FeePayment/GetPendingFees", obj, { headers: this.headers })
+  }
+
+  getPaymentModes(obj: any) {
+    return this.http.post(this.apiUrl + "FeePayment/GetPaymentModes", obj, { headers: this.headers })
+  }
+
+  saveFeePayment(obj: any) {
+    return this.http.post(this.apiUrl + "FeePayment/SaveFeePayment", obj, { headers: this.headers })
+  }
+
+
+  // Fee Installment
+  generateInstallments(obj: any) {
+    return this.http.post(this.apiUrl + "FeeInstallment/GenerateInstallments", obj, { headers: this.headers })
+  }
+
+  getInstallmentList(obj: any) {
+    return this.http.post(this.apiUrl + "FeeInstallment/InstallmentList", obj, { headers: this.headers })
+  }
+
+
+    // Fee Receipt
+  getFeeReceiptList(obj: any) {
+    return this.http.post(this.apiUrl + "FeeReceipt/FeeReceiptList", obj, { headers: this.headers })
+  }
+
+  getReceipt(obj: any) {
+    return this.http.post(this.apiUrl + "FeeReceipt/GetReceipt", obj, { headers: this.headers })
+  }
+  // Fee Reports
+  getPendingFeeReport(obj: any) {
+    return this.http.post(this.apiUrl + "FeeReport/PendingFeeReport", obj, { headers: this.headers })
+  }
+
+  getDailyCollectionReport(obj: any) {
+    return this.http.post(this.apiUrl + "FeeReport/DailyCollectionReport", obj, { headers: this.headers })
+  }
+
+
+
+
+getStudentLedger(obj: any) {
+  return this.http.post(this.apiUrl + "FeeReport/StudentLedger", obj, { headers: this.headers })
+}
+
+
+
+
+
+  getParentList(obj: any) {
+    return this.http.post(this.apiUrl + "Parent/ParentList", obj, { headers: this.headers })
+  }
+
+  getParentByStudent(obj: any) {
+    return this.http.post(this.apiUrl + "Parent/GetParentByStudent", obj, { headers: this.headers })
+  }
+
+  saveParent(obj: any) {
+    return this.http.post(this.apiUrl + "Parent/saveParent", obj, { headers: this.headers })
+  }
+
+  deleteParent(obj: any) {
+    return this.http.post(this.apiUrl + "Parent/deleteParent", obj, { headers: this.headers })
+  }
+
+
+
+
+
+
+  getSmsTemplateList(obj: any) {
+    return this.http.post(this.apiUrl + "SmsTemplate/SmsTemplateList", obj, { headers: this.headers })
+  }
+
+  saveSmsTemplate(obj: any) {
+    return this.http.post(this.apiUrl + "SmsTemplate/saveSmsTemplate", obj, { headers: this.headers })
+  }
+
+  deleteSmsTemplate(obj: any) {
+    return this.http.post(this.apiUrl + "SmsTemplate/deleteSmsTemplate", obj, { headers: this.headers })
+  }
+
   
+
+
+
+
+  getPendingForSms(obj: any) {
+    return this.http.post(this.apiUrl + "Sms/GetPendingForSms", obj, { headers: this.headers })
+  }
+
+  queueFeeReminder(obj: any) {
+    return this.http.post(this.apiUrl + "Sms/QueueFeeReminder", obj, { headers: this.headers })
+  }
+
+  getSmsLogList(obj: any) {
+    return this.http.post(this.apiUrl + "Sms/SmsLogList", obj, { headers: this.headers })
+  }
+
+getMonthlyCollectionReport(obj: any) {
+  return this.http.post(this.apiUrl + "FeeReport/MonthlyCollectionReport", obj, { headers: this.headers })
+}
+
+
+
+
+
+
+
+
+  getPaymentModeList(obj: any) {
+    return this.http.post(this.apiUrl + "PaymentMode/PaymentModeList", obj, { headers: this.headers })
+  }
+
+  savePaymentMode(obj: any) {
+    return this.http.post(this.apiUrl + "PaymentMode/savePaymentMode", obj, { headers: this.headers })
+  }
+
+  deletePaymentMode(obj: any) {
+    return this.http.post(this.apiUrl + "PaymentMode/deletePaymentMode", obj, { headers: this.headers })
+  }
+
+
+
+
+
   // District
   getDistrictList(obj: any) {
     return this.http.post(this.apiUrl + "District/DistrictList", obj, { headers: this.headers })
@@ -54,7 +238,18 @@ export class AppService {
   deleteDistrict(obj: any) {
     return this.http.post(this.apiUrl + "District/deleteDistrict", obj, { headers: this.headers })
   }
+  // Session Master
+  getSessionMasterList(obj: any) {
+    return this.http.post(this.apiUrl + "SessionMaster/SessionMasterList", obj, { headers: this.headers })
+  }
 
+  saveSessionMaster(obj: any) {
+    return this.http.post(this.apiUrl + "SessionMaster/saveSessionMaster", obj, { headers: this.headers })
+  }
+
+  deleteSessionMaster(obj: any) {
+    return this.http.post(this.apiUrl + "SessionMaster/deleteSessionMaster", obj, { headers: this.headers })
+  }
   // Company
   getCompanyList(obj: any) {
     return this.http.post(this.apiUrl + "Company/CompanyList", obj, { headers: this.headers })
