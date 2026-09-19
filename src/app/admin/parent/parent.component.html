@@ -1,0 +1,194 @@
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{ action.MenuTitle || 'Parent Master' }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle || 'Academic' }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle || 'Parent' }}</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-sm-4 mb-3">
+      <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+        data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">
+        New Parent
+      </button>
+    </div>
+  </div>
+
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body">
+
+        <div class="row mb-3">
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Class</mat-label>
+              <mat-select [(ngModel)]="Filter.ClassId" (selectionChange)="getParentList()">
+                <mat-option [value]="null">All Classes</mat-option>
+                <mat-option *ngFor="let c of ClassList" [value]="c.ClassId">{{ c.ClassName }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-2 d-flex align-items-center">
+            <button mat-stroked-button color="warn" (click)="clearFilter()">Clear</button>
+          </div>
+        </div>
+
+        <div class="table-container overflow-auto">
+          <div class="dataTable-top">
+            <div class="dataTable-search">
+              <input class="form-control form-control-sm" [(ngModel)]="Search"
+                placeholder="Search..." style="max-width:220px">
+            </div>
+          </div>
+
+          <table class="table table-bordered table-hover table-sm">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Admission No</th>
+                <th>Student</th>
+                <th>Class</th>
+                <th>Father</th>
+                <th>Father Mobile</th>
+                <th>Mother</th>
+                <th>WhatsApp</th>
+                <th *ngIf="action.CanEdit">Edit</th>
+                <th *ngIf="action.CanDelete">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of ParentList | filter:Search | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index">
+                <td>{{ (p - 1) * itemPerPage + i + 1 }}</td>
+                <td>{{ item.AdmissionNo }}</td>
+                <td>{{ item.StudentName }}</td>
+                <td>{{ item.ClassName }} {{ item.SectionName }}</td>
+                <td>{{ item.FatherName || '-' }}</td>
+                <td>{{ item.FatherMobile || '-' }}</td>
+                <td>{{ item.MotherName || '-' }}</td>
+                <td>{{ item.WhatsAppNo || item.FatherMobile || '-' }}</td>
+                <td *ngIf="action.CanEdit">
+                  <button mat-icon-button color="primary" data-bs-toggle="modal"
+                    data-bs-target="#staticBackdrop" (click)="editParent(item)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </td>
+                <td *ngIf="action.CanDelete">
+                  <button mat-icon-button color="warn" (click)="deleteParent(item)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="ParentList.length == 0">
+                <td colspan="10" class="text-center">No records found</td>
+              </tr>
+            </tbody>
+          </table>
+          <pagination-controls (pageChange)="onTableDataChange($event)"></pagination-controls>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ Parent.ParentId > 0 ? 'Update' : 'New' }} Parent</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" (click)="resetForm()"></button>
+        </div>
+        <div class="modal-body">
+          <form #formParent="ngForm">
+            <div class="row">
+
+              <div class="col-sm-12 mb-2" *ngIf="!Parent.ParentId">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Search Student</mat-label>
+                  <input matInput [(ngModel)]="searchText" name="searchText"
+                    (keyup.enter)="searchStudent()" placeholder="Admission No / Name">
+                </mat-form-field>
+                <button mat-stroked-button type="button" (click)="searchStudent()">Search</button>
+                <div class="list-group mt-1" *ngIf="StudentList.length">
+                  <a href="javascript:void(0)" class="list-group-item list-group-item-action"
+                    *ngFor="let s of StudentList" (click)="selectStudent(s)">
+                    {{ s.AdmissionNo }} — {{ s.StudentName }} ({{ s.ClassName }})
+                  </a>
+                </div>
+                <small class="text-muted" *ngIf="Parent.StudentId">Selected Student Id: {{ Parent.StudentId }}</small>
+              </div>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Father Name</mat-label>
+                <input matInput name="FatherName" [(ngModel)]="Parent.FatherName">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Father Mobile</mat-label>
+                <input matInput name="FatherMobile" [(ngModel)]="Parent.FatherMobile">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Mother Name</mat-label>
+                <input matInput name="MotherName" [(ngModel)]="Parent.MotherName">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Mother Mobile</mat-label>
+                <input matInput name="MotherMobile" [(ngModel)]="Parent.MotherMobile">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Guardian Name</mat-label>
+                <input matInput name="GuardianName" [(ngModel)]="Parent.GuardianName">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Guardian Mobile</mat-label>
+                <input matInput name="GuardianMobile" [(ngModel)]="Parent.GuardianMobile">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>WhatsApp No</mat-label>
+                <input matInput name="WhatsAppNo" [(ngModel)]="Parent.WhatsAppNo"
+                  placeholder="For fee SMS">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Email</mat-label>
+                <input matInput name="Email" [(ngModel)]="Parent.Email">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Father Occupation</mat-label>
+                <input matInput name="FatherOccupation" [(ngModel)]="Parent.FatherOccupation">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Mother Occupation</mat-label>
+                <input matInput name="MotherOccupation" [(ngModel)]="Parent.MotherOccupation">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Annual Income</mat-label>
+                <input matInput type="number" name="AnnualIncome" [(ngModel)]="Parent.AnnualIncome">
+              </mat-form-field>
+
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button mat-raised-button color="warn" data-bs-dismiss="modal" (click)="resetForm()">Cancel</button>
+          <button mat-raised-button color="primary" (click)="saveParent()">
+            {{ Parent.ParentId > 0 ? 'Update' : 'Submit' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
