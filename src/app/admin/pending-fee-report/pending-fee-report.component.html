@@ -1,0 +1,169 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-12">
+      <h1>{{ action.MenuTitle || 'Pending Fee Report' }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle || 'Reports' }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle || 'Pending Fee' }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <div class="card border-danger">
+        <div class="card-body py-3">
+          <div class="text-muted small">Total Pending Amount</div>
+          <div class="fs-4 fw-bold text-danger">₹ {{ TotalPendingAmount | number:'1.2-2' }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-warning">
+        <div class="card-body py-3">
+          <div class="text-muted small">Students with Pending</div>
+          <div class="fs-4 fw-bold text-warning">{{ TotalStudents }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+
+      <!-- Filters -->
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>As On Date</mat-label>
+            <input matInput [matDatepicker]="asOnPicker" [(ngModel)]="Filter.AsOnDate">
+            <mat-datepicker-toggle matSuffix [for]="asOnPicker"></mat-datepicker-toggle>
+            <mat-datepicker #asOnPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Class</mat-label>
+            <mat-select [(ngModel)]="Filter.ClassId" (selectionChange)="onClassChange()">
+              <mat-option [value]="null">All Classes</mat-option>
+              <mat-option *ngFor="let c of ClassList" [value]="c.ClassId">{{ c.ClassName }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Section</mat-label>
+            <mat-select [(ngModel)]="Filter.SectionId">
+              <mat-option [value]="null">All Sections</mat-option>
+              <mat-option *ngFor="let s of SectionList" [value]="s.SectionId">{{ s.SectionName }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3 d-flex align-items-center gap-2">
+          <button mat-raised-button color="primary" (click)="loadReport()">Search</button>
+          <button mat-stroked-button color="warn" (click)="clearFilter()">Clear</button>
+        </div>
+      </div>
+
+      <!-- Toggle view -->
+      <div class="mb-3">
+        <button mat-stroked-button class="me-2"
+          [color]="viewMode === 'summary' ? 'primary' : undefined"
+          (click)="viewMode = 'summary'">Summary</button>
+        <button mat-stroked-button
+          [color]="viewMode === 'detail' ? 'primary' : undefined"
+          (click)="viewMode = 'detail'">Detail</button>
+      </div>
+
+      <!-- Summary table -->
+      <div class="table-responsive" *ngIf="viewMode === 'summary'">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Admission No</th>
+              <th>Student</th>
+              <th>Class</th>
+              <th>Section</th>
+              <th>Mobile</th>
+              <th class="text-end">Pending Amount</th>
+              <th class="text-center">Installments</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of PendingSummary | filter:Search | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index">
+              <td>{{ (p - 1) * itemPerPage + i + 1 }}</td>
+              <td>{{ item.AdmissionNo }}</td>
+              <td>{{ item.StudentName }}</td>
+              <td>{{ item.ClassName }}</td>
+              <td>{{ item.SectionName || '-' }}</td>
+              <td>{{ item.MobileNo || '-' }}</td>
+              <td class="text-end fw-semibold text-danger">₹ {{ item.TotalPending | number:'1.2-2' }}</td>
+              <td class="text-center">{{ item.PendingCount }}</td>
+            </tr>
+            <tr *ngIf="PendingSummary.length == 0">
+              <td colspan="8" class="text-center text-success">No pending fees</td>
+            </tr>
+          </tbody>
+        </table>
+        <pagination-controls (pageChange)="onTableDataChange($event)"></pagination-controls>
+      </div>
+
+      <!-- Detail table -->
+      <div class="table-responsive" *ngIf="viewMode === 'detail'">
+        <table class="table table-bordered table-hover table-sm">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Admission No</th>
+              <th>Student</th>
+              <th>Class</th>
+              <th>Fee Head</th>
+              <th>Period</th>
+              <th class="text-end">Balance</th>
+              <th>Due Date</th>
+              <th>Overdue</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of PendingFeeList | filter:Search | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index">
+              <td>{{ (p - 1) * itemPerPage + i + 1 }}</td>
+              <td>{{ item.AdmissionNo }}</td>
+              <td>{{ item.StudentName }}</td>
+              <td>{{ item.ClassName }}</td>
+              <td>{{ item.FeeHeadName }}</td>
+              <td>{{ getMonthName(item.MonthNo) }} {{ item.YearNo }}</td>
+              <td class="text-end fw-semibold">₹ {{ item.BalanceAmount | number:'1.2-2' }}</td>
+              <td>{{ item.DueDate | date:'dd-MMM-yyyy' }}</td>
+              <td>
+                <span class="badge" [ngClass]="item.OverdueDays > 0 ? 'bg-danger' : 'bg-secondary'"
+                  *ngIf="item.OverdueDays != null">
+                  {{ item.OverdueDays > 0 ? item.OverdueDays + ' days' : 'On time' }}
+                </span>
+              </td>
+              <td>
+                <span class="badge"
+                  [ngClass]="item.PaymentStatus === 'Partial' ? 'bg-warning text-dark' : 'bg-danger'">
+                  {{ item.PaymentStatus }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="PendingFeeList.length == 0">
+              <td colspan="10" class="text-center text-success">No pending fees</td>
+            </tr>
+          </tbody>
+        </table>
+        <pagination-controls (pageChange)="onTableDataChange($event)"></pagination-controls>
+      </div>
+
+    </div>
+  </div>
+
+</main>
