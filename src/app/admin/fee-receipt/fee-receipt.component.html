@@ -1,0 +1,189 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-12">
+      <h1>{{ action.MenuTitle || 'Fee Receipts' }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle || 'Fee' }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle || 'Receipts' }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body">
+
+        <!-- Filters -->
+        <div class="row mb-3">
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>From Date</mat-label>
+              <input matInput [matDatepicker]="fromPicker" [(ngModel)]="Filter.FromDate">
+              <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fromPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>To Date</mat-label>
+              <input matInput [matDatepicker]="toPicker" [(ngModel)]="Filter.ToDate">
+              <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+              <mat-datepicker #toPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Receipt No</mat-label>
+              <input matInput [(ngModel)]="Filter.ReceiptNo" placeholder="e.g. SIA260900001">
+            </mat-form-field>
+          </div>
+          <div class="col-md-3 d-flex align-items-center gap-2">
+            <button mat-raised-button color="primary" (click)="getFeeReceiptList()">Search</button>
+            <button mat-stroked-button color="warn" (click)="clearFilter()">Clear</button>
+          </div>
+        </div>
+
+        <div class="table-container overflow-auto">
+          <div class="dataTable-top">
+            <div class="dataTable-dropdown d-flex">
+              <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                <option *ngFor="let option of PageSize" [value]="option">{{ option }}</option>
+              </select>
+              <span class="ms-2">Entries per page</span>
+            </div>
+            <div class="dataTable-search">
+              <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                placeholder="Search..." type="text">
+            </div>
+          </div>
+
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Receipt No</th>
+                <th>Date</th>
+                <th>Admission No</th>
+                <th>Student</th>
+                <th>Class</th>
+                <th>Mode</th>
+                <th class="text-end">Paid Amount</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of FeeReceiptList | filter:Search | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index">
+                <td>{{ (p - 1) * itemPerPage + i + 1 }}</td>
+                <td class="fw-semibold text-primary">{{ item.ReceiptNo }}</td>
+                <td>{{ item.ReceiptDate | date:'dd-MMM-yyyy hh:mm a' }}</td>
+                <td>{{ item.AdmissionNo }}</td>
+                <td>{{ item.StudentName }}</td>
+                <td>{{ item.ClassName }} {{ item.SectionName }}</td>
+                <td>{{ item.PaymentMode }}</td>
+                <td class="text-end fw-semibold">₹ {{ item.PaidAmount | number:'1.2-2' }}</td>
+                <td>
+                  <button mat-icon-button color="primary" (click)="viewReceipt(item)" matTooltip="View / Print">
+                    <mat-icon>receipt</mat-icon>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="FeeReceiptList.length == 0">
+                <td colspan="9" class="text-center">No receipts found</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="dataTable-bottom">
+            <pagination-controls (pageChange)="onTableDataChange($event)"></pagination-controls>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Receipt Modal -->
+  <div class="modal fade" id="receiptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Fee Receipt</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" *ngIf="Receipt">
+          <div id="printArea">
+            <div class="text-center mb-3">
+              <h4 class="mb-0">Samford International Academy</h4>
+              <small>Jaina More, Bokaro, Jharkhand</small>
+              <h5 class="mt-2">FEE RECEIPT</h5>
+            </div>
+
+            <div class="row mb-2">
+              <div class="col-6"><strong>Receipt No:</strong> {{ Receipt.ReceiptNo }}</div>
+              <div class="col-6 text-end"><strong>Date:</strong> {{ Receipt.ReceiptDate | date:'dd-MMM-yyyy hh:mm a' }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6"><strong>Admission No:</strong> {{ Receipt.AdmissionNo }}</div>
+              <div class="col-6"><strong>Student:</strong> {{ Receipt.StudentName }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>Class:</strong> {{ Receipt.ClassName }} {{ Receipt.SectionName }}</div>
+              <div class="col-6"><strong>Payment Mode:</strong> {{ Receipt.PaymentMode }}</div>
+            </div>
+
+            <table class="table table-bordered table-sm">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Fee Head</th>
+                  <th class="text-end">Amount</th>
+                  <th class="text-end">Discount</th>
+                  <th class="text-end">Fine</th>
+                  <th class="text-end">Net</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let d of ReceiptDetails; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ d.FeeHeadName }}</td>
+                  <td class="text-end">{{ d.Amount | number:'1.2-2' }}</td>
+                  <td class="text-end">{{ d.Discount | number:'1.2-2' }}</td>
+                  <td class="text-end">{{ d.Fine | number:'1.2-2' }}</td>
+                  <td class="text-end">{{ d.NetAmount | number:'1.2-2' }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th colspan="5" class="text-end">Total Paid</th>
+                  <th class="text-end">₹ {{ Receipt.PaidAmount | number:'1.2-2' }}</th>
+                </tr>
+              </tfoot>
+            </table>
+
+            <div class="row mt-3" *ngIf="Receipt.TransactionReference">
+              <div class="col-12"><strong>Txn Ref:</strong> {{ Receipt.TransactionReference }}</div>
+            </div>
+            <div class="row mt-2">
+              <div class="col-6"><strong>Received By:</strong> {{ Receipt.ReceivedByName }}</div>
+              <div class="col-6 text-end"><strong>Remarks:</strong> {{ Receipt.Remarks || '-' }}</div>
+            </div>
+            <div class="text-center mt-4">
+              <small>This is a computer generated receipt.</small>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer no-print">
+          <button type="button" mat-stroked-button data-bs-dismiss="modal">Close</button>
+          <button type="button" mat-raised-button color="primary" (click)="printReceipt()">
+            <mat-icon>print</mat-icon> Print
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
