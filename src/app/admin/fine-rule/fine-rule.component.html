@@ -1,0 +1,140 @@
+<main id="main" class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{ action.MenuTitle || 'Fine Rule' }}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="/admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{ action.ParentMenuTitle || 'Fee' }}</li>
+          <li class="breadcrumb-item active">{{ action.MenuTitle || 'Fine Rule' }}</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-sm-4 mb-3">
+      <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+        data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">
+        New Fine Rule
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Rule Name</th>
+            <th>Academic Year</th>
+            <th>Type</th>
+            <th class="text-end">Amount</th>
+            <th>Grace Days</th>
+            <th class="text-end">Max Fine</th>
+            <th>Status</th>
+            <th *ngIf="action.CanEdit">Edit</th>
+            <th *ngIf="action.CanDelete">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of FineRuleList | filter:Search | paginate: { itemsPerPage: itemPerPage, currentPage: p }; let i = index">
+            <td>{{ (p - 1) * itemPerPage + i + 1 }}</td>
+            <td>{{ item.RuleName }}</td>
+            <td>{{ item.AcademicYear }}</td>
+            <td>{{ getFineTypeName(item.FineType) }}</td>
+            <td class="text-end">{{ item.FineAmount | number:'1.2-2' }}</td>
+            <td>{{ item.GraceDays }}</td>
+            <td class="text-end">{{ item.MaxFineAmount != null ? (item.MaxFineAmount | number:'1.2-2') : '-' }}</td>
+            <td>
+              <span class="badge" [ngClass]="item.Status ? 'bg-success' : 'bg-danger'">
+                {{ item.Status ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td *ngIf="action.CanEdit">
+              <button mat-icon-button color="primary" data-bs-toggle="modal"
+                data-bs-target="#staticBackdrop" (click)="editFineRule(item)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
+            <td *ngIf="action.CanDelete">
+              <button mat-icon-button color="warn" (click)="deleteFineRule(item)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="FineRuleList.length == 0">
+            <td colspan="10" class="text-center">No rules found</td>
+          </tr>
+        </tbody>
+      </table>
+      <pagination-controls (pageChange)="onTableDataChange($event)"></pagination-controls>
+    </div>
+  </div>
+
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ FineRule.FineRuleId > 0 ? 'Update' : 'New' }} Fine Rule</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" (click)="resetForm()"></button>
+        </div>
+        <div class="modal-body">
+          <form #formFineRule="ngForm">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Rule Name</mat-label>
+              <input matInput name="RuleName" [(ngModel)]="FineRule.RuleName" required
+                placeholder="e.g. Late Fee After Due Date">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Academic Year (optional)</mat-label>
+              <mat-select name="AcademicYearId" [(ngModel)]="FineRule.AcademicYearId">
+                <mat-option [value]="null">All Years</mat-option>
+                <mat-option *ngFor="let y of AcademicYearList" [value]="y.AcademicYearId">
+                  {{ y.AcademicYear }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Fine Type</mat-label>
+              <mat-select name="FineType" [(ngModel)]="FineRule.FineType" required>
+                <mat-option *ngFor="let t of FineTypeList" [value]="t.Key">{{ t.Value }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Fine Amount</mat-label>
+              <input matInput type="number" name="FineAmount" [(ngModel)]="FineRule.FineAmount" required min="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Grace Days</mat-label>
+              <input matInput type="number" name="GraceDays" [(ngModel)]="FineRule.GraceDays" min="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Max Fine Amount (optional)</mat-label>
+              <input matInput type="number" name="MaxFineAmount" [(ngModel)]="FineRule.MaxFineAmount" min="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Status</mat-label>
+              <mat-select name="Status" [(ngModel)]="FineRule.Status" required>
+                <mat-option [value]="true">Active</mat-option>
+                <mat-option [value]="false">Inactive</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button mat-raised-button color="warn" data-bs-dismiss="modal" (click)="resetForm()">Cancel</button>
+          <button mat-raised-button color="primary" (click)="saveFineRule()">
+            {{ FineRule.FineRuleId > 0 ? 'Update' : 'Submit' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
