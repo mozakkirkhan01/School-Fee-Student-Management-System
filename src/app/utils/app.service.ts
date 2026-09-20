@@ -205,6 +205,10 @@ getMonthlyCollectionReport(obj: any) {
 
 
 
+  sendPendingSms(obj: any) {
+    return this.http.post(this.apiUrl + "Sms/SendPendingSms", obj, { headers: this.headers })
+  }
+
 
 
 
@@ -223,8 +227,36 @@ getMonthlyCollectionReport(obj: any) {
   }
 
 
+  getStudentAddressList(obj: any) {
+    return this.http.post(this.apiUrl + "StudentAddress/StudentAddressList", obj, { headers: this.headers })
+  }
+
+  saveStudentAddress(obj: any) {
+    return this.http.post(this.apiUrl + "StudentAddress/saveStudentAddress", obj, { headers: this.headers })
+  }
+
+  deleteStudentAddress(obj: any) {
+    return this.http.post(this.apiUrl + "StudentAddress/deleteStudentAddress", obj, { headers: this.headers })
+  }
 
 
+getFeeDashboard(obj: any) {
+  return this.http.post(this.apiUrl + "FeeReport/FeeDashboard", obj, { headers: this.headers })
+}
+
+
+
+  getFineRuleList(obj: any) {
+    return this.http.post(this.apiUrl + "FineRule/FineRuleList", obj, { headers: this.headers })
+  }
+
+  saveFineRule(obj: any) {
+    return this.http.post(this.apiUrl + "FineRule/saveFineRule", obj, { headers: this.headers })
+  }
+
+  deleteFineRule(obj: any) {
+    return this.http.post(this.apiUrl + "FineRule/deleteFineRule", obj, { headers: this.headers })
+  }
 
   // District
   getDistrictList(obj: any) {
