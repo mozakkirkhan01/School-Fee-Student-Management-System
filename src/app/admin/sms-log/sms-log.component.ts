@@ -7,6 +7,8 @@ import { ActionModel, RequestModel, StaffLoginModel } from '../../utils/interfac
 import { LocalService } from '../../utils/local.service';
 import { Router } from '@angular/router';
 
+declare var bootstrap: any;   // <-- add this for Bootstrap modal
+
 @Component({
   selector: 'app-sms-log',
   templateUrl: './sms-log.component.html',
@@ -23,6 +25,8 @@ export class SmsLogComponent {
   p = 1;
   Search = '';
   itemPerPage = this.PageSize[0];
+
+  selectedItem: any = null;   // <-- holds the row being viewed
 
   constructor(
     private service: AppService,
@@ -101,5 +105,15 @@ export class SmsLogComponent {
     if (s === 'queued' || s === 'pending') return 'bg-warning text-dark';
     if (s === 'failed' || s === 'error') return 'bg-danger';
     return 'bg-secondary';
+  }
+
+  // ---------- NEW: open modal with row details ----------
+  viewDetails(item: any) {
+    this.selectedItem = item;
+    const modalEl = document.getElementById('smsDetailModal');
+    if (modalEl) {
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    }
   }
 }

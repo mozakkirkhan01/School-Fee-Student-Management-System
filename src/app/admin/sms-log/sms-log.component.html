@@ -57,8 +57,10 @@
               <th>Mobile</th>
               <th>Message</th>
               <th>Status</th>
+              <th>Reason / Response</th>
               <th>Provider</th>
               <th>Sent On</th>
+              <th class="text-center">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -77,11 +79,20 @@
                   {{ item.Status }}
                 </span>
               </td>
+              <td style="max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
+                  [title]="item.ResponseId">
+                {{ item.ResponseId || '-' }}
+              </td>
               <td>{{ item.SmsProvider || '-' }}</td>
               <td>{{ item.SentOn ? (item.SentOn | date:'dd-MMM-yyyy hh:mm a') : '-' }}</td>
+              <td class="text-center">
+                <button mat-icon-button color="primary" (click)="viewDetails(item)" matTooltip="View Details">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+              </td>
             </tr>
             <tr *ngIf="SmsLogList.length == 0">
-              <td colspan="9" class="text-center text-muted">No SMS logs found</td>
+              <td colspan="11" class="text-center text-muted">No SMS logs found</td>
             </tr>
           </tbody>
         </table>
@@ -90,5 +101,73 @@
 
     </div>
   </div>
+
+  <!-- ================= VIEW DETAILS MODAL ================= -->
+  <div class="modal fade" id="smsDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-envelope-paper"></i> SMS Details
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" *ngIf="selectedItem">
+          <table class="table table-sm table-bordered mb-0">
+            <tbody>
+              <tr>
+                <th style="width:35%">S.No</th>
+                <td>{{ selectedItem.SNo || '-' }}</td>
+              </tr>
+              <tr>
+                <th>Date</th>
+                <td>{{ selectedItem.CreatedOn | date:'dd-MMM-yyyy hh:mm a' }}</td>
+              </tr>
+              <tr>
+                <th>Admission No</th>
+                <td>{{ selectedItem.AdmissionNo || '-' }}</td>
+              </tr>
+              <tr>
+                <th>Student Name</th>
+                <td>{{ selectedItem.StudentName || '-' }}</td>
+              </tr>
+              <tr>
+                <th>Parent Mobile</th>
+                <td>{{ selectedItem.ParentMobile || '-' }}</td>
+              </tr>
+              <tr>
+                <th>Message</th>
+                <td style="white-space:pre-wrap; word-break:break-word;">{{ selectedItem.MessageText || '-' }}</td>
+              </tr>
+              <tr>
+                <th>Status</th>
+                <td>
+                  <span class="badge" [ngClass]="getStatusClass(selectedItem.Status)">
+                    {{ selectedItem.Status }}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th>Reason / Response</th>
+                <td style="white-space:pre-wrap; word-break:break-word;">{{ selectedItem.ResponseId || '-' }}</td>
+              </tr>
+              <tr>
+                <th>SMS Provider</th>
+                <td>{{ selectedItem.SmsProvider || '-' }}</td>
+              </tr>
+              <tr>
+                <th>Sent On</th>
+                <td>{{ selectedItem.SentOn ? (selectedItem.SentOn | date:'dd-MMM-yyyy hh:mm a') : '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ====================================================== -->
 
 </main>
