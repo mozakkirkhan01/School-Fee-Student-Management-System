@@ -35,6 +35,9 @@ import { FeeReminderSmsComponent } from './admin/fee-reminder-sms/fee-reminder-s
 import { SmsLogComponent } from './admin/sms-log/sms-log.component';
 import { MonthlyCollectionReportComponent } from './admin/monthly-collection-report/monthly-collection-report.component';
 import { PaymentModeComponent } from './admin/payment-mode/payment-mode.component';
+import { StudentAddressComponent } from './admin/student-address/student-address.component';
+import { FeeDashboardComponent } from './admin/fee-dashboard/fee-dashboard.component';
+import { FineRuleComponent } from './admin/fine-rule/fine-rule.component';
 
 const routes: Routes = [
   { path: '', redirectTo: "/admin-login", pathMatch: 'full' },
@@ -74,6 +77,9 @@ const routes: Routes = [
       { path: 'sms-log', component: SmsLogComponent},
       { path: 'monthly-collection-report', component: MonthlyCollectionReportComponent},
       { path: 'payment-mode', component: PaymentModeComponent},
+      { path: 'student-address', component: StudentAddressComponent},
+      { path: 'fee-dashboard', component: FeeDashboardComponent},
+      { path: 'fine-rule', component: FineRuleComponent},
 
     ]
   },
