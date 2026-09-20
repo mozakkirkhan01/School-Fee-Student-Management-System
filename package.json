@@ -24,6 +24,7 @@
     "@angular/router": "^16.1.0",
     "@types/crypto-js": "^4.2.2",
     "bwip-js": "^4.5.1",
+    "chart.js": "^4.5.1",
     "crypto-js": "^4.1.1",
     "file-saver": "^2.0.5",
     "jquery": "^3.7.1",
