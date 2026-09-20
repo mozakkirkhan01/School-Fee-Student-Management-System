@@ -159,6 +159,30 @@ export class FeeReminderSmsComponent {
     });
   }
 
+  sendPendingSms() {
+    if (!confirm('Send all pending queued SMS now? This will contact Fast2SMS for each unsent message.')) return;
+    const obj: RequestModel = {
+      request: this.localService.encrypt(JSON.stringify({})).toString()
+    };
+    this.dataLoading = true;
+    this.service.sendPendingSms(obj).subscribe(r1 => {
+      const response = r1 as any;
+      if (response.Message == ConstantData.SuccessMessage) {
+        let msg = `Sent: ${response.Sent}, Failed: ${response.Failed}`;
+        if (response.SkippedRetryLimit > 0) {
+          msg += `, Gave up on ${response.SkippedRetryLimit} (5 failed attempts — check SMS Log)`;
+        }
+        this.toastr.success(msg);
+      } else {
+        this.toastr.error(response.Message);
+      }
+      this.dataLoading = false;
+    }, () => {
+      this.toastr.error('Error while sending SMS');
+      this.dataLoading = false;
+    });
+  }
+
   onTableDataChange(p: any) {
     this.p = p;
   }

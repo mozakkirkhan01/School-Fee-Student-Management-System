@@ -44,6 +44,9 @@
             {{ selectedIds.length === PendingSmsList.length ? 'Deselect All' : 'Select All' }}
           </button>
           <button mat-stroked-button (click)="loadPending()">Refresh</button>
+          <button mat-raised-button color="accent" (click)="sendPendingSms()">
+            Send Now
+          </button>
         </div>
       </div>
       <small class="text-muted">
