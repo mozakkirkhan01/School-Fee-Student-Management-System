@@ -59,8 +59,17 @@ export class FeeReceiptComponent {
   }
 
   getFeeReceiptList() {
+    // loadDateYMD formats using local calendar fields (getFullYear/getMonth/getDate),
+    // never converting through UTC — this avoids the timezone bug where
+    // JSON.stringify(Date) could shift "today" to the previous day depending on
+    // the browser's UTC offset, silently excluding same-day receipts from the filter.
+    const payload = {
+      FromDate: this.loadData.loadDateYMD(this.Filter.FromDate),
+      ToDate: this.loadData.loadDateYMD(this.Filter.ToDate),
+      ReceiptNo: this.Filter.ReceiptNo || null
+    };
     const obj: RequestModel = {
-      request: this.localService.encrypt(JSON.stringify(this.Filter || {})).toString()
+      request: this.localService.encrypt(JSON.stringify(payload)).toString()
     };
     this.dataLoading = true;
     this.service.getFeeReceiptList(obj).subscribe(r1 => {
